@@ -11,7 +11,8 @@ class BankAccount:
         self.__pin = pin
         self.balance = balance
         self.debt = 0
-        self.max_borrow = 2000
+        self.max_borrow = 10000
+
 
 
     def show_info(self):
@@ -21,12 +22,15 @@ class BankAccount:
         print("Balance:", self.balance)
 
 
+
     def check_pin(self, pin):
         return pin == self.__pin
 
 
+
     def deposit(self, amount):
         self.balance += amount
+
 
 
     def withdraw(self, withdraw_amount):
@@ -34,6 +38,7 @@ class BankAccount:
             return False
         self.balance -= withdraw_amount
         return True
+
 
 
     def borrow(self, amount):
@@ -46,6 +51,14 @@ class BankAccount:
         self.balance += amount
         self.debt += amount
         return True
+    
+
+    def repay(self, amount):
+        self.balance -= amount
+        self.debt -= amount
+        return True
+    
+
 
 
 def account_exists(name):
@@ -53,6 +66,8 @@ def account_exists(name):
         if acc.name == name:
             return True
     return False
+
+
 
 
 while True:
@@ -63,10 +78,13 @@ while True:
     print("4. Withdrawal Money")
     print("5. Transfer Money")
     print("6. Borrow Money")
-    print("7. Show All Accounts")
-    print("8. Exit")
+    print("7. Repay Debt")
+    print("8. Show All Accounts")
+    print("9. Exit")
 
     choice = input("Choose an option: ")
+
+
 
     if choice == "1":
         name = input("Enter name to create account: ")
@@ -95,6 +113,9 @@ while True:
 
 
 
+
+
+
     elif choice == "2":
         name = input("Please enter your name: ")
         pin = input("Please enter your PIN: ")
@@ -111,6 +132,10 @@ while True:
                 break
         else:
             print("Account not found!")
+
+
+
+
 
 
 
@@ -132,6 +157,9 @@ while True:
 
 
 
+
+
+
     elif choice == "4":
         if found_account is None:
             print("Please log in first.")
@@ -150,6 +178,9 @@ while True:
             print("New balance:", found_account.balance)
         else:
             print("Insufficient funds!")
+
+
+
 
 
 
@@ -190,6 +221,10 @@ while True:
 
 
 
+
+
+
+
     elif choice == "6":
         if found_account is None:
             print("Please log in first")
@@ -212,7 +247,62 @@ while True:
 
 
 
+
+
+
     elif choice == "7":
+        if found_account is None:
+            print("Please log in first")
+            continue
+
+        if found_account.debt == 0:
+            print("You have no Debt to Repay")
+            continue
+
+        repay_amount = int(input("Pls enter the amount you would like to repay debt:"))
+
+        if repay_amount <= 0:
+            print("Repay amount cannot be a negative!")
+            continue
+
+        if repay_amount > found_account.balance:
+            print("You cannot Repay more then the current balance")
+            continue
+
+        if repay_amount > found_account.debt:
+            print("You cannot repay more then the remaining debt!")
+            continue
+
+        success = found_account.repay(repay_amount)
+
+        if success:
+            print("Repay successful")
+            print("New Balance:", found_account.balance)
+            print("New Debt:", found_account.debt)
+        else:
+            print("Repayment failed")
+
+
+
+
+
+
+
+
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+    elif choice == "8":
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -221,7 +311,10 @@ while True:
 
 
 
-    elif choice == "8":
+
+
+
+    elif choice == "9":
         print("Have a good day. Bye!")
         break
 
