@@ -12,6 +12,7 @@ class BankAccount:
         self.balance = balance
         self.debt = 0
         self.max_borrow = 10000
+        self.transaction_history = []
 
 
 
@@ -30,13 +31,15 @@ class BankAccount:
 
     def deposit(self, amount):
         self.balance += amount
+        self.transaction_history.append("Deposited: " + str(amount))
 
 
 
-    def withdraw(self, withdraw_amount):
-        if withdraw_amount > self.balance:
+    def withdraw(self, amount):
+        if amount > self.balance:
             return False
-        self.balance -= withdraw_amount
+        self.balance -= amount
+        self.transaction_history.append("Withdrawn: " + str(amount))
         return True
 
 
@@ -50,13 +53,21 @@ class BankAccount:
 
         self.balance += amount
         self.debt += amount
+        self.transaction_history.append("Borrowed: " + str(amount))
         return True
     
 
     def repay(self, amount):
         self.balance -= amount
         self.debt -= amount
+        self.transaction_history.append("Repaid: " + str(amount))
         return True
+    def show_transactions(self):
+        print("---------------")
+        print("Transaction History:")
+
+        for transaction in self.transaction_history:
+            print(transaction)
     
 
 
@@ -79,10 +90,14 @@ while True:
     print("5. Transfer Money")
     print("6. Borrow Money")
     print("7. Repay Debt")
-    print("8. Show All Accounts")
-    print("9. Exit")
+    print("8. Show Transaction History")
+    print("9. Show All Accounts")
+    print("10. Exit")
+
 
     choice = input("Choose an option: ")
+
+
 
 
 
@@ -116,6 +131,8 @@ while True:
 
 
 
+
+
     elif choice == "2":
         name = input("Please enter your name: ")
         pin = input("Please enter your PIN: ")
@@ -132,6 +149,8 @@ while True:
                 break
         else:
             print("Account not found!")
+
+
 
 
 
@@ -160,6 +179,8 @@ while True:
 
 
 
+
+
     elif choice == "4":
         if found_account is None:
             print("Please log in first.")
@@ -178,6 +199,8 @@ while True:
             print("New balance:", found_account.balance)
         else:
             print("Insufficient funds!")
+
+
 
 
 
@@ -216,8 +239,12 @@ while True:
             recipient_account.deposit(transfer_amount)
             print("Transfer successful!")
             print("Your new balance:", found_account.balance)
+            found_account.transaction_history.append("Transferred: " + str(transfer_amount))
+            recipient_account.transaction_history.append("Received: " + str(transfer_amount))
         else:
             print("Insufficient funds for transfer!")
+
+
 
 
 
@@ -244,6 +271,8 @@ while True:
             print("New debt:", found_account.debt)
         else:
             print("Borrow failed (limit reached or invalid amount)")
+
+
 
 
 
@@ -281,21 +310,7 @@ while True:
             print("New Debt:", found_account.debt)
         else:
             print("Repayment failed")
-
-
-
-
-
-
-
-
     
-    
-    
-
-
-
-
 
 
 
@@ -303,6 +318,28 @@ while True:
 
 
     elif choice == "8":
+        if found_account is None:
+            print("Pls log in first")
+            continue
+        if len(found_account.transaction_history) == 0:
+            print("You have no transactions yet!")
+        else:
+            found_account.show_transactions()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    elif choice == "9":
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -314,7 +351,7 @@ while True:
 
 
 
-    elif choice == "9":
+    elif choice == "10":
         print("Have a good day. Bye!")
         break
 
