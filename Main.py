@@ -70,6 +70,11 @@ class BankAccount:
             print(transaction)
     
 
+    def get_pin(self):
+        return self.__pin
+    
+    
+
 
 
 def account_exists(name):
@@ -79,7 +84,45 @@ def account_exists(name):
     return False
 
 
+def save_accounts():
+    file = open("bank_data.txt", "w")
 
+    for acc in accounts:
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt)
+        file.write(line + "\n")
+
+    file.close()
+
+
+def load_accounts():
+    file = open("bank_data.txt", "r")
+
+    for line in file:
+        if line.strip() == "":
+            continue
+
+        data = line.strip().split(",")
+
+        name = data[0]
+        age = int(data[1])
+        pin = data[2]
+        balance = int(data[3])
+        debt = int(data[4])
+
+        account = BankAccount(name, age, pin, balance)
+        account.debt = debt
+
+        accounts.append(account)
+
+    file.close()
+
+
+
+
+
+
+
+load_accounts()
 
 while True:
 
@@ -123,6 +166,7 @@ while True:
 
         account = BankAccount(name, age, pin, balance)
         accounts.append(account)
+        save_accounts()
 
         print("Account successfully created!")
 
@@ -173,6 +217,7 @@ while True:
 
         print("Deposit was successful!")
         print("New balance:", found_account.balance)
+        save_accounts()
 
 
 
@@ -197,6 +242,7 @@ while True:
         if success:
             print("Withdrawal successful!")
             print("New balance:", found_account.balance)
+            save_accounts()
         else:
             print("Insufficient funds!")
 
@@ -241,6 +287,7 @@ while True:
             print("Your new balance:", found_account.balance)
             found_account.transaction_history.append("Transferred: " + str(transfer_amount))
             recipient_account.transaction_history.append("Received: " + str(transfer_amount))
+            save_accounts()
         else:
             print("Insufficient funds for transfer!")
 
@@ -269,6 +316,7 @@ while True:
             print("Borrow successful!")
             print("New balance:", found_account.balance)
             print("New debt:", found_account.debt)
+            save_accounts()
         else:
             print("Borrow failed (limit reached or invalid amount)")
 
@@ -308,11 +356,10 @@ while True:
             print("Repay successful")
             print("New Balance:", found_account.balance)
             print("New Debt:", found_account.debt)
+            save_accounts()
         else:
             print("Repayment failed")
     
-
-
 
 
 
