@@ -73,7 +73,16 @@ class BankAccount:
     def get_pin(self):
         return self.__pin
     
+
+    def update_pin(self, pin):
+        self.__pin = pin
+        return True
     
+
+
+
+
+
 
 
 
@@ -134,11 +143,13 @@ while True:
     print("6. Borrow Money")
     print("7. Repay Debt")
     print("8. Show Transaction History")
-    print("9. Show All Accounts")
-    print("10. Exit")
+    print("9. Change PIN")
+    print("10. Show All Accounts")
+    print("11. Exit")
 
 
     choice = input("Choose an option: ")
+
 
 
 
@@ -177,6 +188,7 @@ while True:
 
 
 
+
     elif choice == "2":
         name = input("Please enter your name: ")
         pin = input("Please enter your PIN: ")
@@ -193,6 +205,7 @@ while True:
                 break
         else:
             print("Account not found!")
+
 
 
 
@@ -226,6 +239,7 @@ while True:
 
 
 
+
     elif choice == "4":
         if found_account is None:
             print("Please log in first.")
@@ -245,6 +259,9 @@ while True:
             save_accounts()
         else:
             print("Insufficient funds!")
+
+
+
 
 
 
@@ -299,6 +316,7 @@ while True:
 
 
 
+
     elif choice == "6":
         if found_account is None:
             print("Please log in first")
@@ -319,6 +337,8 @@ while True:
             save_accounts()
         else:
             print("Borrow failed (limit reached or invalid amount)")
+
+
 
 
 
@@ -364,6 +384,10 @@ while True:
 
 
 
+
+
+
+
     elif choice == "8":
         if found_account is None:
             print("Pls log in first")
@@ -379,14 +403,46 @@ while True:
 
 
 
-
-
-
-
-
-
-
+    
     elif choice == "9":
+        if found_account is None:
+            print("Pls log in first!")
+            continue
+
+        current_pin = input("Pls enter your current pin to change your pin: ")
+
+        found_account.check_pin(current_pin)
+
+        if not found_account.check_pin(current_pin):
+            print("Wrong pin pls retry!")
+            continue
+
+        new_pin = input("Pls enter your new pin: ")
+
+        if len(new_pin) != 4:
+            print("Pin must be exactly 4 digits!")
+            continue
+
+        if not new_pin.isdigit():
+            print("PIN must contain only numbers!")
+            continue
+
+        success = found_account.update_pin(new_pin)
+        save_accounts()
+        
+        if success:
+            print("PIN updated successfully!")
+        else:
+            print("PIN was not updated!")
+
+
+
+
+
+
+
+
+    elif choice == "10":
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -398,10 +454,11 @@ while True:
 
 
 
-    elif choice == "10":
+    elif choice == "11":
         print("Have a good day. Bye!")
         break
 
 
     else:
         print("Invalid option. Please try again.")
+        
