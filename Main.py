@@ -3,6 +3,8 @@ print("Welcome to Ilham Banking System!")
 accounts = []
 found_account = None
 
+correct_admin_password = "admin1290"
+
 
 class BankAccount:
     def __init__(self, name, age, pin, balance):
@@ -144,8 +146,9 @@ while True:
     print("7. Repay Debt")
     print("8. Show Transaction History")
     print("9. Change PIN")
-    print("10. Show All Accounts")
-    print("11. Exit")
+    print("10. Admin Log In")
+    print("11. Show All Accounts")
+    print("12. Exit")
 
 
     choice = input("Choose an option: ")
@@ -438,11 +441,110 @@ while True:
 
 
 
-
-
-
-
     elif choice == "10":
+        admin_password = input("Pls enter the admin password: ")
+
+        if admin_password != correct_admin_password:
+            print("Wrong admin password pls retry!")
+            continue
+
+
+        while True:
+
+
+            print("\n1. Show All Accounts")
+            print("2. Search Account")
+            print("3. Delete Account")
+            print("4. Total Bank Balance")
+            print("5. Total Bank Debt")
+            print("6. Exit Admin Panel")
+
+            admin_choice = input("Pls Choose an option Admin: ")
+
+
+            if admin_choice == "1":
+                if len(accounts) == 0:
+                    print("No accounts created yet.")
+                else:
+                    for acc in accounts:
+                        acc.show_info()
+            
+            
+
+            elif admin_choice == "2":
+                found_account = None
+                for acc in accounts:
+                    if acc.name == name:
+                        acc.show_info()
+                        found_account = acc
+                if found_account == None:
+                    print("No accounts were found Admin")
+
+
+            
+
+
+
+            elif admin_choice == "3":
+                found_account = None
+                
+                delete_account = input("Pls enter the Account name to Delete!")
+
+                for acc in accounts:
+                    if acc.name == delete_account:
+                        found_account = acc
+                        break
+
+                if found_account is None:
+                    print("Account Not Found!")
+                    continue
+
+                accounts.remove(found_account)
+                print("Account successfully deleted Admin!")
+                save_accounts()
+            
+
+
+
+
+            elif admin_choice == "4":
+                total_balance = 0
+
+                for acc in accounts:
+                    total_balance += acc.balance
+                print("The Total Bank Balance is:", total_balance, "Admin")
+
+
+
+
+            
+            elif admin_choice == "5":
+                total_debt = 0
+                for acc in accounts:
+                    total_debt += acc.debt
+                print("The Total Bank Debt is:", total_debt, "Admin")
+
+            
+
+            elif admin_choice == "6":
+                print("Good Bye Admin See You Later!")
+                break
+            else:
+                print("Invalid choice.Admin Pls Retry!")
+
+
+    
+
+
+
+
+
+
+
+
+
+
+    elif choice == "11":
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -454,7 +556,10 @@ while True:
 
 
 
-    elif choice == "11":
+
+
+
+    elif choice == "12":
         print("Have a good day. Bye!")
         break
 
