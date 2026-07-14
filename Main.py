@@ -15,6 +15,9 @@ class BankAccount:
         self.debt = 0
         self.max_borrow = 10000
         self.transaction_history = []
+        self.failed_login_attempts = 0
+        self.account_locked = False
+
 
 
 
@@ -99,7 +102,7 @@ def save_accounts():
     file = open("bank_data.txt", "w")
 
     for acc in accounts:
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt)
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked)
         file.write(line + "\n")
 
     file.close()
@@ -119,9 +122,13 @@ def load_accounts():
         pin = data[2]
         balance = int(data[3])
         debt = int(data[4])
+        failed_login_attempts = int(data[5])
+        account_locked = data[6]
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
+        account.failed_login_attempts = failed_login_attempts
+        account.account_locked = account_locked
 
         accounts.append(account)
 
@@ -200,14 +207,29 @@ while True:
 
         for acc in accounts:
             if name == acc.name:
-                if acc.check_pin(pin):
                     found_account = acc
-                    print("Login successful!")
-                else:
-                    print("Invalid PIN!")
-                break
+                    break
         else:
             print("Account not found!")
+            continue
+        if found_account.account_locked:
+                print("Account already locked")
+                continue
+        elif found_account.check_pin(pin):
+            acc.failed_login_attempts = 0
+            print("Log in successful")
+        else:
+            print("Invalid PIN!")
+
+            acc.failed_login_attempts += 1
+            tries_left = 3 - acc.failed_login_attempts
+            print("You got", tries_left, "Tries Left!")
+
+            if acc.failed_login_attempts == 3:
+                acc.account_locked = True
+                save_accounts()
+                print("To many tries account has been locked!")
+
 
 
 
@@ -457,7 +479,8 @@ while True:
             print("3. Delete Account")
             print("4. Total Bank Balance")
             print("5. Total Bank Debt")
-            print("6. Exit Admin Panel")
+            print("6. Unlock Account")
+            print("7. Exit Admin Panel")
 
             admin_choice = input("Pls Choose an option Admin: ")
 
@@ -524,13 +547,46 @@ while True:
                     total_debt += acc.debt
                 print("The Total Bank Debt is:", total_debt, "Admin")
 
-            
+
+
 
             elif admin_choice == "6":
+
+                found_account = None
+
+                unlock_account = input("Pls enter the name of the account you would like to unlock Admin: ")
+
+
+                for acc in accounts:
+                    if acc.name == unlock_account:
+                        found_account = acc
+                        break
+
+                if not found_account:
+                        print("No account were found. Admin!")
+                        continue
+                            
+                confirm_unlock = input("Are you SURE admin you want to UNLOCK this account (yes/no)").lower()
+                if confirm_unlock == "yes":
+                    found_account.account_locked = False
+                    found_account.failed_login_attempts = 0 
+                    save_accounts()
+                    print("Account was successfully unlocked!. Admin!")
+                    print("Thank you admin for confirming!")
+                elif confirm_unlock == "no":
+                    print("Okey admin have a good day!.")
+                    print("Thank you admin for confirming!")
+
+
+
+            
+
+
+            elif admin_choice == "7":
                 print("Good Bye Admin See You Later!")
                 break
             else:
-                print("Invalid choice.Admin Pls Retry!")
+                print("Invalid choice. Admin Pls Retry!")
 
 
     
