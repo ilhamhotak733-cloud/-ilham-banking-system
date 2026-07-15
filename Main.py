@@ -17,6 +17,8 @@ class BankAccount:
         self.transaction_history = []
         self.failed_login_attempts = 0
         self.account_locked = False
+        self.credit_score = 650
+
 
 
 
@@ -58,6 +60,11 @@ class BankAccount:
 
         self.balance += amount
         self.debt += amount
+
+        self.credit_score = self.credit_score - amount//50 
+        if self.credit_score < 300:
+            self.credit_score = 300
+
         self.transaction_history.append("Borrowed: " + str(amount))
         return True
     
@@ -65,8 +72,17 @@ class BankAccount:
     def repay(self, amount):
         self.balance -= amount
         self.debt -= amount
+
+        self.credit_score = self.credit_score + amount//50
+        if self.credit_score > 300:
+            self.credit_score = 300
+
         self.transaction_history.append("Repaid: " + str(amount))
         return True
+
+    
+
+
     def show_transactions(self):
         print("---------------")
         print("Transaction History:")
@@ -82,6 +98,25 @@ class BankAccount:
     def update_pin(self, pin):
         self.__pin = pin
         return True
+    
+
+    def credit_rating(self):
+        if self.credit_score >= 800 and self.credit_score <= 850:
+            return "Excellent"
+        
+        elif self.credit_score >= 740 and self.credit_score <= 499:
+            return "Very Good"
+        
+        elif self.credit_score >= 670 and self.credit_score <= 739:
+            return "Good"
+        
+        elif self.credit_score >= 580 and self.credit_score <= 669:
+            return "Fair"
+        
+        elif self.credit_score >= 300 and self.credit_score <= 579:
+            return "Poor"
+
+
     
 
 
@@ -102,7 +137,7 @@ def save_accounts():
     file = open("bank_data.txt", "w")
 
     for acc in accounts:
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked)
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score)
         file.write(line + "\n")
 
     file.close()
@@ -124,11 +159,13 @@ def load_accounts():
         debt = int(data[4])
         failed_login_attempts = int(data[5])
         account_locked = data[6]
+        credit_score = int(data[7])
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
         account.failed_login_attempts = failed_login_attempts
         account.account_locked = account_locked
+        account.credit_score = credit_score
 
         accounts.append(account)
 
@@ -154,8 +191,9 @@ while True:
     print("8. Show Transaction History")
     print("9. Change PIN")
     print("10. Admin Log In")
-    print("11. Show All Accounts")
-    print("12. Exit")
+    print("11. Check Current Credit Score")
+    print("12. Show All Accounts")
+    print("13. Exit")
 
 
     choice = input("Choose an option: ")
@@ -589,6 +627,22 @@ while True:
                 print("Invalid choice. Admin Pls Retry!")
 
 
+
+
+
+    
+
+    elif choice == "11":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+        print(name,"'s", "Current Credit Score is:", found_account.credit_score)
+        print("Your Credit Rating is:", found_account.credit_rating())
+
+
+
+
+
     
 
 
@@ -600,7 +654,7 @@ while True:
 
 
 
-    elif choice == "11":
+    elif choice == "12":
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -615,7 +669,7 @@ while True:
 
 
 
-    elif choice == "12":
+    elif choice == "13":
         print("Have a good day. Bye!")
         break
 
