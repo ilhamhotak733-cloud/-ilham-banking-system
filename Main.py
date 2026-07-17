@@ -13,11 +13,13 @@ class BankAccount:
         self.__pin = pin
         self.balance = balance
         self.debt = 0
-        self.max_borrow = 10000
+        self.max_borrow = 100000
         self.transaction_history = []
         self.failed_login_attempts = 0
         self.account_locked = False
         self.credit_score = 650
+        self.saving_balance = 0
+
 
 
 
@@ -115,6 +117,54 @@ class BankAccount:
         
         elif self.credit_score >= 300 and self.credit_score <= 579:
             return "Poor"
+        
+    
+
+    def transfer_to_savings(self, amount):
+        if amount > self.balance:
+            return False
+        self.balance -= amount
+        self.saving_balance += amount
+        self.transaction_history.append("Transferred to Savings: " + str(amount))
+        return True
+    
+
+
+    
+
+
+    def transfer_to_checkings(self, amount):
+        if amount > self.saving_balance:
+            return False
+        self.saving_balance -= amount
+        self.balance += amount
+        self.transaction_history.append("Transferred to Checking: " + str(amount))
+        return True
+
+
+
+
+
+
+    def apply_interest(self, rate):
+        interest = self.saving_balance * rate
+        self.saving_balance = self.saving_balance + interest
+        self.transaction_history.append("Apply interest: " + str(interest))
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
 
 
     
@@ -137,7 +187,9 @@ def save_accounts():
     file = open("bank_data.txt", "w")
 
     for acc in accounts:
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score)
+        history = "|".join(acc.transaction_history)
+        
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + history
         file.write(line + "\n")
 
     file.close()
@@ -158,14 +210,18 @@ def load_accounts():
         balance = int(data[3])
         debt = int(data[4])
         failed_login_attempts = int(data[5])
-        account_locked = data[6]
+        account_locked = data[6] == "True"
         credit_score = int(data[7])
+        saving_balance = float(data[8])
+        transaction_history = data[9].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
         account.failed_login_attempts = failed_login_attempts
         account.account_locked = account_locked
         account.credit_score = credit_score
+        account.saving_balance = saving_balance
+        account.transaction_history = transaction_history
 
         accounts.append(account)
 
@@ -192,8 +248,12 @@ while True:
     print("9. Change PIN")
     print("10. Admin Log In")
     print("11. Check Current Credit Score")
-    print("12. Show All Accounts")
-    print("13. Exit")
+    print("12. View Current Savings Balance")
+    print("13. View Current Checkings Balance")
+    print("14. Transfer to Savings")
+    print("15. Transfer to Checking")
+    print("16. Show All Accounts")
+    print("17. Exit")
 
 
     choice = input("Choose an option: ")
@@ -254,17 +314,17 @@ while True:
                 print("Account already locked")
                 continue
         elif found_account.check_pin(pin):
-            acc.failed_login_attempts = 0
+            found_account.failed_login_attempts = 0
             print("Log in successful")
         else:
             print("Invalid PIN!")
 
-            acc.failed_login_attempts += 1
-            tries_left = 3 - acc.failed_login_attempts
+            found_account.failed_login_attempts += 1
+            tries_left = 3 - found_account.failed_login_attempts
             print("You got", tries_left, "Tries Left!")
 
-            if acc.failed_login_attempts == 3:
-                acc.account_locked = True
+            if found_account.failed_login_attempts == 3:
+                found_account.account_locked = True
                 save_accounts()
                 print("To many tries account has been locked!")
 
@@ -282,6 +342,10 @@ while True:
         if found_account is None:
             print("Please log in first.")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         deposit = int(input("Please enter deposit amount: "))
 
@@ -303,10 +367,17 @@ while True:
 
 
 
+
+
     elif choice == "4":
         if found_account is None:
             print("Please log in first.")
             continue
+
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         withdraw_amount = int(input("Please enter the amount you would like to withdraw: "))
 
@@ -333,10 +404,15 @@ while True:
 
 
 
+
     elif choice == "5":
         if found_account is None:
             print("Please log in first.")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         transfer_amount = int(input("Please enter the amount you would like to transfer: "))
 
@@ -380,10 +456,15 @@ while True:
 
 
 
+
     elif choice == "6":
         if found_account is None:
             print("Please log in first")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         borrow_amount = int(input("Pls enter the amount you would like to borrow:"))
 
@@ -410,10 +491,15 @@ while True:
 
 
 
+
     elif choice == "7":
         if found_account is None:
             print("Please log in first")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         if found_account.debt == 0:
             print("You have no Debt to Repay")
@@ -451,14 +537,21 @@ while True:
 
 
 
+
     elif choice == "8":
         if found_account is None:
             print("Pls log in first")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
         if len(found_account.transaction_history) == 0:
             print("You have no transactions yet!")
         else:
             found_account.show_transactions()
+
 
 
 
@@ -471,6 +564,10 @@ while True:
         if found_account is None:
             print("Pls log in first!")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
 
         current_pin = input("Pls enter your current pin to change your pin: ")
 
@@ -501,7 +598,17 @@ while True:
 
 
 
+
+
+
+
+
+
     elif choice == "10":
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
         admin_password = input("Pls enter the admin password: ")
 
         if admin_password != correct_admin_password:
@@ -532,6 +639,8 @@ while True:
             
             
 
+
+
             elif admin_choice == "2":
                 found_account = None
                 for acc in accounts:
@@ -542,9 +651,9 @@ while True:
                     print("No accounts were found Admin")
 
 
+
+
             
-
-
 
             elif admin_choice == "3":
                 found_account = None
@@ -564,6 +673,9 @@ while True:
                 print("Account successfully deleted Admin!")
                 save_accounts()
             
+
+
+
 
 
 
@@ -630,12 +742,20 @@ while True:
 
 
 
+
+
     
 
     elif choice == "11":
         if found_account is None:
             print("Pls login first!")
             continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
+
         print(name,"'s", "Current Credit Score is:", found_account.credit_score)
         print("Your Credit Rating is:", found_account.credit_rating())
 
@@ -643,6 +763,73 @@ while True:
 
 
 
+
+
+
+    
+
+    elif choice == "12":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
+        found_account.apply_interest(0.05)
+        save_accounts()
+        print(name, "s", "Current Saving Balance Is: ", found_account.saving_balance)
+
+
+
+
+    
+    elif choice == "13":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+        if found_account.account_locked:
+            print("Account is locked!")
+            continue
+
+        print(name, "s", "Current Checking Balance Is: ", found_account.balance)
+
+
+
+
+
+
+
+
+
+
+
+    elif choice == "14":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+
+
+        transfer_amount_to_savings = int(input("Pls enter the amount you would like to transfer to your savings acccount: "))
+
+
+        success = found_account.transfer_to_savings(transfer_amount_to_savings)
+
+        if success:
+            print("Transferring the amount to your savings account was a success!")
+            print("Your New Saving Balance Is: ", found_account.saving_balance)
+            print("Your New Checking Balance Is: ", found_account.balance)
+            save_accounts()
+
+        else:
+            print("Transferring money to savings account was failed!")
     
 
 
@@ -653,8 +840,55 @@ while True:
 
 
 
+    elif choice == "15":
+        if found_account is None:
+            print("Pls login first!")
+            continue
 
-    elif choice == "12":
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+
+
+
+
+        transfer_amount_to_checkings = int(input("Pls enter the amount you would like to transfer to your checkings account: "))
+
+
+
+        success = found_account.transfer_to_checkings(transfer_amount_to_checkings)
+
+
+        if success:
+            print("Transferring the amount to your checkings account was a success!")
+            print("Your New Checking Balance Is: ", found_account.balance)
+            print("Your New Savings Balance Is: ", found_account.saving_balance)
+            save_accounts()
+
+
+        else:
+            print("Transferring money to checkings account was failed!")
+
+
+
+        
+
+
+
+
+
+
+
+
+
+    elif choice == "16":
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
+
         if len(accounts) == 0:
             print("No accounts created yet.")
         else:
@@ -669,7 +903,7 @@ while True:
 
 
 
-    elif choice == "13":
+    elif choice == "17":
         print("Have a good day. Bye!")
         break
 
