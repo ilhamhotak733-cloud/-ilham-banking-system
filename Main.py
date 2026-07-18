@@ -13,7 +13,6 @@ class BankAccount:
         self.__pin = pin
         self.balance = balance
         self.debt = 0
-        self.max_borrow = 100000
         self.transaction_history = []
         self.failed_login_attempts = 0
         self.account_locked = False
@@ -55,10 +54,32 @@ class BankAccount:
 
     def borrow(self, amount):
         if amount <= 0:
-            return False
+            return (False, "Loan amount can not be a NEGATIVE")
+        
 
-        if self.debt + amount > self.max_borrow:
-            return False
+        if self.credit_score >= 750 and self.credit_score <= 850:
+            max_loan = 10000
+        
+
+        elif self.credit_score >= 650 and self.credit_score <= 749:
+            max_loan = 5000
+
+
+        elif self.credit_score >= 500 and self.credit_score <= 649:
+            max_loan = 2500
+
+
+        elif self.credit_score >= 300 and self.credit_score <= 499:
+            max_loan = 0
+            return (False, "Loan was Unsuccessful because Credit Score was to LOW to reach the Minimum Credit Score needed to Loan the Amount")
+
+
+        
+        if amount > max_loan:
+            return (False, "Loan was Unsuccessful because it was OVER the Maximum Amount of Loan!")
+
+
+        
 
         self.balance += amount
         self.debt += amount
@@ -68,7 +89,7 @@ class BankAccount:
             self.credit_score = 300
 
         self.transaction_history.append("Borrowed: " + str(amount))
-        return True
+        return (True, "Loan was SUCCESSFUL and approved!")
     
 
     def repay(self, amount):
@@ -76,12 +97,12 @@ class BankAccount:
         self.debt -= amount
 
         self.credit_score = self.credit_score + amount//50
-        if self.credit_score > 300:
-            self.credit_score = 300
+        if self.credit_score > 850:
+            self.credit_score = 850
 
         self.transaction_history.append("Repaid: " + str(amount))
         return True
-
+ 
     
 
 
@@ -472,15 +493,15 @@ while True:
             print("Borrow amount cannot be negative!")
             continue
 
-        success = found_account.borrow(borrow_amount)
+        success, message = found_account.borrow(borrow_amount)
 
         if success:
-            print("Borrow successful!")
+            print(message)
             print("New balance:", found_account.balance)
             print("New debt:", found_account.debt)
             save_accounts()
         else:
-            print("Borrow failed (limit reached or invalid amount)")
+            print(message)
 
 
 
