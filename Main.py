@@ -1,5 +1,7 @@
 print("Welcome to Ilham Banking System!")
 
+import datetime
+
 accounts = []
 found_account = None
 
@@ -24,6 +26,9 @@ class BankAccount:
 
 
 
+
+
+
     def show_info(self):
         print("---------------")
         print("Name:", self.name)
@@ -32,14 +37,26 @@ class BankAccount:
 
 
 
+
+
+
+
     def check_pin(self, pin):
         return pin == self.__pin
+
+
+
 
 
 
     def deposit(self, amount):
         self.balance += amount
         self.transaction_history.append("Deposited: " + str(amount))
+
+
+
+
+
 
 
 
@@ -52,34 +69,24 @@ class BankAccount:
 
 
 
+
+
+
+
+
     def borrow(self, amount):
         if amount <= 0:
             return (False, "Loan amount can not be a NEGATIVE")
         
+        max_loan = self.get_max_loan()
 
-        if self.credit_score >= 750 and self.credit_score <= 850:
-            max_loan = 10000
-        
-
-        elif self.credit_score >= 650 and self.credit_score <= 749:
-            max_loan = 5000
-
-
-        elif self.credit_score >= 500 and self.credit_score <= 649:
-            max_loan = 2500
-
-
-        elif self.credit_score >= 300 and self.credit_score <= 499:
-            max_loan = 0
+        if max_loan == 0:
             return (False, "Loan was Unsuccessful because Credit Score was to LOW to reach the Minimum Credit Score needed to Loan the Amount")
 
 
         
         if amount > max_loan:
             return (False, "Loan was Unsuccessful because it was OVER the Maximum Amount of Loan!")
-
-
-        
 
         self.balance += amount
         self.debt += amount
@@ -91,6 +98,12 @@ class BankAccount:
         self.transaction_history.append("Borrowed: " + str(amount))
         return (True, "Loan was SUCCESSFUL and approved!")
     
+
+
+
+
+
+
 
     def repay(self, amount):
         self.balance -= amount
@@ -106,6 +119,11 @@ class BankAccount:
     
 
 
+
+
+
+
+
     def show_transactions(self):
         print("---------------")
         print("Transaction History:")
@@ -114,14 +132,32 @@ class BankAccount:
             print(transaction)
     
 
+
+
+
+
+
     def get_pin(self):
         return self.__pin
     
+
+
+
+
+
+
+
 
     def update_pin(self, pin):
         self.__pin = pin
         return True
     
+
+
+
+
+
+
 
     def credit_rating(self):
         if self.credit_score >= 800 and self.credit_score <= 850:
@@ -141,6 +177,11 @@ class BankAccount:
         
     
 
+
+
+
+
+
     def transfer_to_savings(self, amount):
         if amount > self.balance:
             return False
@@ -151,7 +192,10 @@ class BankAccount:
     
 
 
+
+
     
+
 
 
     def transfer_to_checkings(self, amount):
@@ -167,28 +211,44 @@ class BankAccount:
 
 
 
+
+
+
     def apply_interest(self, rate):
         interest = self.saving_balance * rate
         self.saving_balance = self.saving_balance + interest
         self.transaction_history.append("Apply interest: " + str(interest))
 
 
+    
 
 
 
 
 
 
+    def get_max_loan(self):
+        if self.credit_score >= 750 and self.credit_score <= 850:
+            max_loan = 10000
+        
 
+        elif self.credit_score >= 650 and self.credit_score <= 749:
+            max_loan = 5000
+
+
+        elif self.credit_score >= 500 and self.credit_score <= 649:
+            max_loan = 2500
+
+
+        elif self.credit_score >= 300 and self.credit_score <= 499:
+            max_loan = 0
+
+        return max_loan 
         
 
 
 
 
-
-
-
-    
 
 
 
@@ -204,6 +264,12 @@ def account_exists(name):
     return False
 
 
+
+
+
+
+
+
 def save_accounts():
     file = open("bank_data.txt", "w")
 
@@ -214,6 +280,13 @@ def save_accounts():
         file.write(line + "\n")
 
     file.close()
+
+
+
+
+
+
+
 
 
 def load_accounts():
@@ -254,6 +327,8 @@ def load_accounts():
 
 
 
+
+
 load_accounts()
 
 while True:
@@ -273,11 +348,14 @@ while True:
     print("13. View Current Checkings Balance")
     print("14. Transfer to Savings")
     print("15. Transfer to Checking")
-    print("16. Show All Accounts")
-    print("17. Exit")
+    print("16. Bank Statement")
+    print("17. Show All Accounts")
+    print("18. Exit")
 
 
     choice = input("Choose an option: ")
+
+
 
 
 
@@ -309,6 +387,10 @@ while True:
         save_accounts()
 
         print("Account successfully created!")
+
+
+
+
 
 
 
@@ -359,6 +441,8 @@ while True:
 
 
 
+
+
     elif choice == "3":
         if found_account is None:
             print("Please log in first.")
@@ -379,6 +463,9 @@ while True:
         print("Deposit was successful!")
         print("New balance:", found_account.balance)
         save_accounts()
+
+
+
 
 
 
@@ -414,6 +501,9 @@ while True:
             save_accounts()
         else:
             print("Insufficient funds!")
+
+
+
 
 
 
@@ -478,6 +568,8 @@ while True:
 
 
 
+
+
     elif choice == "6":
         if found_account is None:
             print("Please log in first")
@@ -502,6 +594,8 @@ while True:
             save_accounts()
         else:
             print(message)
+
+
 
 
 
@@ -559,6 +653,10 @@ while True:
 
 
 
+
+
+
+
     elif choice == "8":
         if found_account is None:
             print("Pls log in first")
@@ -572,6 +670,11 @@ while True:
             print("You have no transactions yet!")
         else:
             found_account.show_transactions()
+
+
+
+
+
 
 
 
@@ -615,6 +718,9 @@ while True:
             print("PIN updated successfully!")
         else:
             print("PIN was not updated!")
+
+
+
 
 
 
@@ -765,6 +871,8 @@ while True:
 
 
 
+
+
     
 
     elif choice == "11":
@@ -779,6 +887,7 @@ while True:
 
         print(name,"'s", "Current Credit Score is:", found_account.credit_score)
         print("Your Credit Rating is:", found_account.credit_rating())
+
 
 
 
@@ -805,6 +914,11 @@ while True:
 
 
 
+
+
+
+
+
     
     elif choice == "13":
         if found_account is None:
@@ -816,6 +930,7 @@ while True:
             continue
 
         print(name, "s", "Current Checking Balance Is: ", found_account.balance)
+
 
 
 
@@ -861,6 +976,8 @@ while True:
 
 
 
+
+
     elif choice == "15":
         if found_account is None:
             print("Pls login first!")
@@ -893,6 +1010,104 @@ while True:
 
 
 
+
+
+
+
+
+    
+
+    elif choice == "16":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+
+        if found_account.account_locked:
+            print("Account is locked!")
+            continue
+
+        date_time = datetime.date.today()
+        current_datetime = datetime.datetime.now()
+        current_time = current_datetime.strftime("%I:%M:%S %p")
+
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+        print("               ILHAM BANK                    ")
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+
+        print("Account Holder: ", found_account.name.upper())
+        print("---------------------------------------------")
+        print("Current Date: ", datetime.date.today())
+        print("---------------------------------------------")
+        print("Current Time: ", current_datetime.strftime("%I:%M:%S %p"))
+        print("---------------------------------------------")
+        
+
+        print("Your Checking Balance is: ", found_account.balance)
+
+        print("---------------")
+
+        print("Your Saving balance is: ", found_account.saving_balance)
+
+        print("---------------")
+
+        print("Your Current Debt is: ", found_account.debt)
+
+        print("---------------")
+
+        print("Your Current Credit Score is: ", found_account.credit_score)
+
+        print("---------------")
+
+        print("Your Max Loan is: ", found_account.get_max_loan())
+
+
+
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+        print("              TRANSACTION HISTORY            ")
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+
+        print("---------------")
+        if len(found_account.transaction_history) == 0:
+            print("You have no transactions yet!")
+        else:
+            found_account.show_transactions()
+        print("---------------")
+
+
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+        print("                    SUMMARY                  ")
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+
+
+        print("---------------")
+        print("Your total number of transactions is: ", len(found_account.transaction_history))
+        print("---------------")
+
+        status = found_account.account_locked
+        if found_account.account_locked is True:
+            status = found_account.account_locked
+            status = "Locked"
+        else:
+            status = "Unlocked"
+        
+
+        print("---------------")
+        print("Your Account Status is: ", status)
+        print("---------------")
+
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+        print("           BANK STATEMENT COMPLETE!          ")
+        print("---------------------------------------------")
+        print("---------------------------------------------")
+
         
 
 
@@ -900,10 +1115,12 @@ while True:
 
 
 
+        
 
 
 
-    elif choice == "16":
+
+    elif choice == "17":
 
         if found_account.account_locked:
                 print("Account is locked!")
@@ -924,7 +1141,7 @@ while True:
 
 
 
-    elif choice == "17":
+    elif choice == "18":
         print("Have a good day. Bye!")
         break
 

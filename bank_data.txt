@@ -1,3 +1,5 @@
-Ilham,24,2321,100200,0,0,False,300,0.0,Deposited: 200|Withdrawn: 300|Borrowed: 500|Repaid: 200|Repaid: 300|Deposited: 300
-Raihan,22,232,1700,0,0,False,649,716.625,|Deposited: 500|Withdrawn: 200|Apply interest: 0.0|Transferred to Savings: 1000|Apply interest: 50.0|Transferred to Checking: 400|Apply interest: 32.5|Borrowed: 3000|Borrowed: 2000|Borrowed: 2000|Apply interest: 34.125|Borrowed: 2000|Repaid: 2|Repaid: 8000|Repaid: 998
+Raihan,22,232,1700,0,0,False,649,716.625,|Deposited: 500|Withdrawn: 200|Apply interest: 0.0|Transferred to Savings: 1000|Apply interest: 50.0|Transferred to Checking: 400|Apply interest: 32.5|Borrowed: 3000|Borrowed: 2000|Borrowed: 2000|Apply interest: 34.125|Borrowed: 2000|Repaid: 2|Repaid: 8000|Repaid: 998|Deposited: 2|Withdrawn: 2
 ggs,212,222,2200,0,0,False,300,0.0,Deposited: 2000|Borrowed: 4000|Repaid: 4000
+Ilham,23,23212,143000,0,0,False,650,0.0,Deposited: 60000|Withdrawn: 2000|Deposited: 5000|Received: 5000|Apply interest: 0.0
+goat,21,22,200,0,0,False,650,0.0,
+Ronaldo,40,7777,21700,0,0,False,649,68050.0,Deposited: 500|Withdrawn: 4000|Withdrawn: 5000|Transferred: 5000|Borrowed: 400|Repaid: 400|Apply interest: 0.0|Transferred to Savings: 65000|Apply interest: 3250.0|Transferred to Checking: 200|Borrowed: 5000|Borrowed: 2500|Borrowed: 2500|Repaid: 1|Repaid: 9999|Borrowed: 200|Repaid: 200
