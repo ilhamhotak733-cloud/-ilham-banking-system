@@ -2,6 +2,9 @@ print("Welcome to Ilham Banking System!")
 
 import datetime
 
+import random
+
+
 accounts = []
 found_account = None
 
@@ -20,6 +23,15 @@ class BankAccount:
         self.account_locked = False
         self.credit_score = 650
         self.saving_balance = 0
+        self.card_number = 0
+        self.cvv = 0
+        self.expiration_month = 0
+        self.expiration_year = 0
+        self.debit_card()
+        
+
+
+
 
 
 
@@ -182,6 +194,7 @@ class BankAccount:
 
 
 
+
     def transfer_to_savings(self, amount):
         if amount > self.balance:
             return False
@@ -195,6 +208,7 @@ class BankAccount:
 
 
     
+
 
 
 
@@ -214,6 +228,7 @@ class BankAccount:
 
 
 
+
     def apply_interest(self, rate):
         interest = self.saving_balance * rate
         self.saving_balance = self.saving_balance + interest
@@ -221,6 +236,8 @@ class BankAccount:
 
 
     
+
+
 
 
 
@@ -244,7 +261,40 @@ class BankAccount:
             max_loan = 0
 
         return max_loan 
+    
+
+
+
+
+
+
+
+
+    def debit_card(self):
+        lowest_16_digits = 1000000000000000
+        largest_16_digits = 9999999999999999
+        random.randint(lowest_16_digits, largest_16_digits)
+        self.card_number = random.randint(lowest_16_digits, largest_16_digits)
+
+
+        lowest_cvv_3_digits = 100
+        largest_cvv_3_digits = 999
+        random.randint(lowest_cvv_3_digits, largest_cvv_3_digits)
+        self.cvv = random.randint(lowest_cvv_3_digits, largest_cvv_3_digits)
+
+
+        lowest_month = 1
+        largest_month = 12
+        random.randint(lowest_month, largest_month)
+        self.expiration_month = random.randint(lowest_month, largest_month)
+
+
+        lowest_future_year = 2029
+        largest_future_year = 2033
+        random.randint(lowest_future_year, largest_future_year)
+        self.expiration_year = random.randint(lowest_future_year, largest_future_year)
         
+
 
 
 
@@ -276,10 +326,11 @@ def save_accounts():
     for acc in accounts:
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + history
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + history 
         file.write(line + "\n")
 
     file.close()
+
 
 
 
@@ -307,7 +358,11 @@ def load_accounts():
         account_locked = data[6] == "True"
         credit_score = int(data[7])
         saving_balance = float(data[8])
-        transaction_history = data[9].split("|")
+        card_number = int(data[9])
+        cvv = int(data[10])
+        expiration_month = int(data[11])
+        expiration_year = int(data[12])
+        transaction_history = data[13].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -315,6 +370,10 @@ def load_accounts():
         account.account_locked = account_locked
         account.credit_score = credit_score
         account.saving_balance = saving_balance
+        account.card_number = card_number
+        account.cvv = cvv
+        account.expiration_month = expiration_month
+        account.expiration_year = expiration_year
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -349,11 +408,15 @@ while True:
     print("14. Transfer to Savings")
     print("15. Transfer to Checking")
     print("16. Bank Statement")
-    print("17. Show All Accounts")
-    print("18. Exit")
+    print("17. ATM")
+    print("18. Replace Lost Card")
+    print("19. View Debit Card Details")
+    print("20. Show All Accounts")
+    print("21. Exit")
 
 
     choice = input("Choose an option: ")
+
 
 
 
@@ -387,6 +450,7 @@ while True:
         save_accounts()
 
         print("Account successfully created!")
+
 
 
 
@@ -443,6 +507,7 @@ while True:
 
 
 
+
     elif choice == "3":
         if found_account is None:
             print("Please log in first.")
@@ -463,6 +528,8 @@ while True:
         print("Deposit was successful!")
         print("New balance:", found_account.balance)
         save_accounts()
+
+
 
 
 
@@ -501,6 +568,7 @@ while True:
             save_accounts()
         else:
             print("Insufficient funds!")
+
 
 
 
@@ -570,6 +638,7 @@ while True:
 
 
 
+
     elif choice == "6":
         if found_account is None:
             print("Please log in first")
@@ -594,6 +663,8 @@ while True:
             save_accounts()
         else:
             print(message)
+
+
 
 
 
@@ -657,6 +728,7 @@ while True:
 
 
 
+
     elif choice == "8":
         if found_account is None:
             print("Pls log in first")
@@ -670,6 +742,8 @@ while True:
             print("You have no transactions yet!")
         else:
             found_account.show_transactions()
+
+
 
 
 
@@ -743,7 +817,11 @@ while True:
             continue
 
 
+
+
         while True:
+
+
 
 
             print("\n1. Show All Accounts")
@@ -754,7 +832,13 @@ while True:
             print("6. Unlock Account")
             print("7. Exit Admin Panel")
 
+
+
+
             admin_choice = input("Pls Choose an option Admin: ")
+
+
+
 
 
             if admin_choice == "1":
@@ -764,6 +848,10 @@ while True:
                     for acc in accounts:
                         acc.show_info()
             
+
+
+
+
             
 
 
@@ -781,6 +869,9 @@ while True:
 
 
             
+
+
+
 
             elif admin_choice == "3":
                 found_account = None
@@ -807,6 +898,8 @@ while True:
 
 
 
+
+
             elif admin_choice == "4":
                 total_balance = 0
 
@@ -817,12 +910,20 @@ while True:
 
 
 
+
+
+
+
             
             elif admin_choice == "5":
                 total_debt = 0
                 for acc in accounts:
                     total_debt += acc.debt
                 print("The Total Bank Debt is:", total_debt, "Admin")
+
+
+
+
 
 
 
@@ -859,11 +960,14 @@ while True:
             
 
 
+
+
             elif admin_choice == "7":
                 print("Good Bye Admin See You Later!")
                 break
             else:
                 print("Invalid choice. Admin Pls Retry!")
+
 
 
 
@@ -896,6 +1000,7 @@ while True:
 
 
 
+
     
 
     elif choice == "12":
@@ -907,9 +1012,8 @@ while True:
                 print("Account is locked!")
                 continue
         
-        found_account.apply_interest(0.05)
-        save_accounts()
-        print(name, "s", "Current Saving Balance Is: ", found_account.saving_balance)
+        print(acc.name, "s", "Current Saving Balance Is: ", found_account.saving_balance)
+
 
 
 
@@ -929,7 +1033,8 @@ while True:
             print("Account is locked!")
             continue
 
-        print(name, "s", "Current Checking Balance Is: ", found_account.balance)
+        print(acc.name, "s", "Current Checking Balance Is: ", found_account.balance)
+
 
 
 
@@ -957,6 +1062,7 @@ while True:
 
 
         success = found_account.transfer_to_savings(transfer_amount_to_savings)
+        found_account.apply_interest(0.05)
 
         if success:
             print("Transferring the amount to your savings account was a success!")
@@ -967,6 +1073,7 @@ while True:
         else:
             print("Transferring money to savings account was failed!")
     
+
 
 
 
@@ -1007,6 +1114,7 @@ while True:
 
         else:
             print("Transferring money to checkings account was failed!")
+
 
 
 
@@ -1108,19 +1216,306 @@ while True:
         print("---------------------------------------------")
         print("---------------------------------------------")
 
-        
 
 
 
 
 
 
-        
 
 
 
-
+    
     elif choice == "17":
+        card_number = int(input("Pls enter your card number: "))
+        for acc in accounts:
+            if card_number == acc.card_number:
+                    found_account = acc
+                    break
+        else:
+            print("Card number was not found pls retry!")
+            continue
+
+        cvv_number = int(input("Pls enter the your cvv number: "))
+        if cvv_number == found_account.cvv:
+            found_account.failed_login_attempts = 0
+
+        
+        else:
+            print("Cvv number was not found pls retry!")
+
+
+            found_account.failed_login_attempts += 1
+            tries_left = 3 - found_account.failed_login_attempts
+            print("You got", tries_left, "Tries Left!")
+
+            if found_account.failed_login_attempts == 3:
+                found_account.account_locked = True
+                save_accounts()
+                print("To many tries account has been locked!")
+
+        
+        pin_number = (input("Pls enter your pin: "))
+        if found_account.check_pin(pin_number):
+            found_account.failed_login_attempts = 0
+            print("ATM login was succcessfull")
+
+
+
+            while True:
+
+
+
+                print("\n1. Check Balance")
+                print("2. Withdraw Cash")
+                print("3. Deposit Cash")
+                print("4. Transfer Money")
+                print("5. View Savings Balance")
+                print("6. Exit ATM")
+
+
+                atm_choice = input("Pls choose an option: ")
+
+
+
+
+
+                if atm_choice == "1": 
+                    print("Your Check balance is: ", found_account.balance)
+
+
+
+
+
+
+
+
+
+                elif atm_choice == "2":
+                    withdraw_cash = int(input("Please enter the amount of Cash you would like to Withdraw: "))
+
+                    if withdraw_cash < 0:
+                        print("Withdrawal amount of Cash cannot be Negative!")
+                        continue
+
+                    success = found_account.withdraw(withdraw_cash)
+
+                    if success:
+                        print("Withdrawal successful!")
+                        print("Pls take your cash: ",withdraw_cash)
+                        print("New balance:", found_account.balance)
+                        save_accounts()
+                    else:
+                        print("Insufficient funds!")
+                
+
+
+
+
+
+
+
+
+                elif atm_choice == "3":
+                    deposit_cash = int(input("Pls enter the amount of Cash you would like to Deposit: "))
+
+                    if deposit_cash <= 0:
+                        print("Deposit amount of Cash cannot be a Negative")
+                        continue
+
+                    found_account.deposit(deposit_cash)
+
+                    print("Deposit amount of Cash was successfully!")
+                    print("New Balance: ", found_account.balance)
+                    save_accounts()
+
+                
+
+
+
+
+
+
+
+
+                elif atm_choice == "4":
+                    transfer_cash = int(input("Please enter the amount you would like to transfer: "))
+
+                    if transfer_cash < 0:
+                        print("Transfer amount cannot be negative!")
+                        continue
+
+                    recipient_name_transfer = input("Please enter the recipient's name: ")
+
+                    recipient_transfer_account = None
+
+                    for acc in accounts:
+                        if acc.name == recipient_name_transfer:
+                            recipient_transfer_account = acc
+                            break
+
+                    if recipient_transfer_account is None:
+                        print("Recipient account not found!")
+                        continue
+
+                    if recipient_transfer_account == found_account:
+                        print("You cannot transfer money to yourself!")
+                        continue
+
+                    if found_account.withdraw(transfer_cash):
+                            recipient_transfer_account.deposit(transfer_cash)
+                            print("Transfer successful!")
+                            print("Your new balance:", found_account.balance)
+                            found_account.transaction_history.append("Transferred: " + str(transfer_cash))
+                            recipient_transfer_account.transaction_history.append("Received: " + str(transfer_cash))
+                            save_accounts()
+                    else:
+                        print("Insufficient funds for transfer!")
+
+
+
+
+
+
+
+
+                
+                elif atm_choice == "5":
+                    print(acc.name, "s", "Current Saving Balance Is: ", found_account.saving_balance)
+
+                
+
+                elif atm_choice == "6":
+                    print("Good bye")
+                    break
+                else:
+                    print("Invalid choice")
+
+
+
+        else:
+            print("Pin number was not found pls retry!")
+
+
+            found_account.failed_login_attempts += 1
+            tries_left = 3 - found_account.failed_login_attempts
+            print("You got", tries_left, "Tries Left!")
+
+            if found_account.failed_login_attempts == 3:
+                found_account.account_locked = True
+                save_accounts()
+                print("To many tries account has been locked!")
+
+
+
+    
+
+
+
+    elif choice == "18":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+        
+        
+        
+        check_current_pin = input("Pls enter your current pin: ")
+
+
+        if found_account.check_pin(check_current_pin):
+            found_account.failed_login_attempts = 0
+
+        
+            found_account.debit_card()
+            found_account.transaction_history.append("Debit card replaced")
+            save_accounts()
+            print("Debit Card replacements was successfully!")
+            print("Your new debit card Information is: ", found_account.card_number, found_account.cvv, found_account.expiration_month, found_account.expiration_year)
+            print("------------------------------")
+
+        else:
+            print("Pin number was not found pls retry!")
+            found_account.failed_login_attempts += 1
+            tries_left = 3 - found_account.failed_login_attempts
+            print("You got", tries_left, "Tries Left!")
+            if found_account.failed_login_attempts == 3:
+                found_account.account_locked = True
+                save_accounts()
+                print("To many tries account has been locked!")
+
+
+
+
+
+
+
+
+
+
+
+
+    elif choice == "19":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+
+
+        if found_account.account_locked:
+                print("Account is locked!")
+                continue
+
+        verify_current_pin = input("Pls enter your current pin: ")
+
+        if found_account.check_pin(verify_current_pin):
+            found_account.failed_login_attempts = 0
+            save_accounts()
+            print("------------------")
+            print("Your debit card Number is: ", found_account.card_number)
+            print("----------------- ")
+            print("Your Debit Card Cvv Number is: ", found_account.cvv)
+            print("----------------- ")
+            print("Your Debit Card Expiration month is: ", found_account.expiration_month)
+            print("----------------- ")
+            print("Your Debit Card expiration Year is: ", found_account.expiration_year)
+            print("----------------- ")
+
+
+        else:
+            print("Pin number was not found pls retry!")
+            found_account.failed_login_attempts += 1
+            tries_left = 3 - found_account.failed_login_attempts
+            print("You got", tries_left, "Tries Left!")
+            if found_account.failed_login_attempts == 3:
+                found_account.account_locked = True
+                save_accounts()
+                print("To many tries account has been locked!")
+
+
+
+
+
+
+            
+
+
+        
+
+
+        
+
+
+
+
+
+
+    elif choice == "20":
 
         if found_account.account_locked:
                 print("Account is locked!")
@@ -1141,7 +1536,7 @@ while True:
 
 
 
-    elif choice == "18":
+    elif choice == "21":
         print("Have a good day. Bye!")
         break
 
