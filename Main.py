@@ -28,6 +28,9 @@ class BankAccount:
         self.expiration_month = 0
         self.expiration_year = 0
         self.debit_card()
+        self.monthly_budget = 0
+        self.money_spent_this_month = 0
+
         
 
 
@@ -326,7 +329,7 @@ def save_accounts():
     for acc in accounts:
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + history 
         file.write(line + "\n")
 
     file.close()
@@ -362,7 +365,9 @@ def load_accounts():
         cvv = int(data[10])
         expiration_month = int(data[11])
         expiration_year = int(data[12])
-        transaction_history = data[13].split("|")
+        monthly_budget = int(data[13])
+        money_spent_this_month = int(data[14])
+        transaction_history = data[15].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -374,6 +379,8 @@ def load_accounts():
         account.cvv = cvv
         account.expiration_month = expiration_month
         account.expiration_year = expiration_year
+        account.monthly_budget = monthly_budget
+        account.money_spent_this_month = money_spent_this_month
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -411,8 +418,11 @@ while True:
     print("17. ATM")
     print("18. Replace Lost Card")
     print("19. View Debit Card Details")
-    print("20. Show All Accounts")
-    print("21. Exit")
+    print("20. Set Monthly Budget")
+    print("21. View Remaining Budget")
+    print("22. Reset Monthly Budget")
+    print("23. Show All Accounts")
+    print("24. Exit")
 
 
     choice = input("Choose an option: ")
@@ -565,6 +575,20 @@ while True:
         if success:
             print("Withdrawal successful!")
             print("New balance:", found_account.balance)
+            found_account.money_spent_this_month += withdraw_amount
+            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+            if found_account.money_spent_this_month > found_account.monthly_budget:
+                print("MAX BUDGET EXCEEDED!")
+
+            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                print("WARNING ALMOST EXCEEDED!")
+                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                print("Your REMAINING Budget is: ", month_remaining_budget)
+
+            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                print("WARNING!!")
+                print("You have used 80% of your monthly budget")
             save_accounts()
         else:
             print("Insufficient funds!")
@@ -620,6 +644,22 @@ while True:
             recipient_account.deposit(transfer_amount)
             print("Transfer successful!")
             print("Your new balance:", found_account.balance)
+            found_account.money_spent_this_month += transfer_amount
+            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+
+            if found_account.money_spent_this_month > found_account.monthly_budget:
+                print("MAX BUDGET EXCEEDED!")
+
+            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                print("WARNING ALMOST EXCEEDED!")
+                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                print("Your REMAINING Budget is: ", month_remaining_budget)
+
+            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                print("WARNING!!")
+                print("You have used 80% of your monthly budget")
+                
             found_account.transaction_history.append("Transferred: " + str(transfer_amount))
             recipient_account.transaction_history.append("Received: " + str(transfer_amount))
             save_accounts()
@@ -1243,12 +1283,9 @@ while True:
         
         else:
             print("Cvv number was not found pls retry!")
-
-
             found_account.failed_login_attempts += 1
             tries_left = 3 - found_account.failed_login_attempts
             print("You got", tries_left, "Tries Left!")
-
             if found_account.failed_login_attempts == 3:
                 found_account.account_locked = True
                 save_accounts()
@@ -1304,6 +1341,22 @@ while True:
                         print("Withdrawal successful!")
                         print("Pls take your cash: ",withdraw_cash)
                         print("New balance:", found_account.balance)
+                        found_account.money_spent_this_month += withdraw_cash
+                        budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+
+                        if found_account.money_spent_this_month > found_account.monthly_budget:
+                            print("MAX BUDGET EXCEEDED!")
+
+                        elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                            print("WARNING ALMOST EXCEEDED!")
+                            print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+
+                            month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                            print("Your REMAINING Budget is: ", month_remaining_budget)
+
+                        elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                            print("WARNING!!")
+                            print("You have used 80% of your monthly budget")
                         save_accounts()
                     else:
                         print("Insufficient funds!")
@@ -1366,6 +1419,22 @@ while True:
                             recipient_transfer_account.deposit(transfer_cash)
                             print("Transfer successful!")
                             print("Your new balance:", found_account.balance)
+                            found_account.money_spent_this_month += transfer_cash
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Transferred: " + str(transfer_cash))
                             recipient_transfer_account.transaction_history.append("Received: " + str(transfer_cash))
                             save_accounts()
@@ -1500,6 +1569,88 @@ while True:
 
 
 
+    
+
+
+    elif choice == "20":
+        if found_account is None:
+            print("Pls Login first!")
+            continue
+
+        if found_account.account_locked:
+            print("Account Locked!")
+            continue
+
+
+        monthly_budget_money = int(input("Pls enter your Monthly Budget: "))
+
+        found_account.monthly_budget = monthly_budget_money 
+        save_accounts()
+        found_account.transaction_history.append("Monthly Budget is: " +  str(monthly_budget_money))
+        print("Congrats Your Monthly Budget is: ", found_account.monthly_budget)
+
+
+
+
+
+
+
+
+
+    elif choice == "21":
+        if found_account is None:
+            print("Pls Login first!")
+            continue
+
+
+        if found_account.account_locked:
+            print("Account Locked!")
+            continue
+
+
+        remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month
+        print("Your Monthly Budget is: ", found_account.monthly_budget)
+        print("You Spent: ", found_account.money_spent_this_month)
+        print("Your Remaining Budget is: ", remaining_budget)
+
+
+
+
+    
+
+    elif choice == "22":
+        if found_account is None:
+            print("Pls Login in first!")
+            continue
+
+        if found_account.account_locked:
+            print("Account is Locked!")
+            continue
+
+        confirm_reset = input("Are YOU SURE you want to RESET YOUR MONTHLY SPENT BUDGET? (YES/NO)").upper()
+        if confirm_reset == "YES":
+            found_account.money_spent_this_month = 0
+            found_account.transaction_history.append("Monthly spent budget Reset!")
+            save_accounts()
+            print("Monthly Spent Budget Successfully Reseted!")
+        
+        elif confirm_reset == "NO":
+            print("Thank you for confirming your monthly spent budget Has NOT been reseted!")
+        
+
+        else:
+            print("INVALID Choice pls enter either YES or NO!")
+
+
+
+
+
+        
+
+
+
+
+
 
 
             
@@ -1515,7 +1666,7 @@ while True:
 
 
 
-    elif choice == "20":
+    elif choice == "23":
 
         if found_account.account_locked:
                 print("Account is locked!")
@@ -1536,7 +1687,7 @@ while True:
 
 
 
-    elif choice == "21":
+    elif choice == "24":
         print("Have a good day. Bye!")
         break
 
