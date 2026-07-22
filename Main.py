@@ -421,8 +421,9 @@ while True:
     print("20. Set Monthly Budget")
     print("21. View Remaining Budget")
     print("22. Reset Monthly Budget")
-    print("23. Show All Accounts")
-    print("24. Exit")
+    print("23. Pay Bills")
+    print("24. Show All Accounts")
+    print("25. Exit")
 
 
     choice = input("Choose an option: ")
@@ -1290,6 +1291,7 @@ while True:
                 found_account.account_locked = True
                 save_accounts()
                 print("To many tries account has been locked!")
+            continue
 
         
         pin_number = (input("Pls enter your pin: "))
@@ -1645,28 +1647,242 @@ while True:
 
 
 
-        
-
-
-
-
-
-
-
-            
-
-
-        
-
-
-        
-
-
 
 
 
 
     elif choice == "23":
+        if found_account is None:
+            print("Pls login first!")
+            continue
+
+        if found_account.account_locked:
+            print("Account is Locked")
+            continue
+
+
+
+        while True:
+        
+        
+        
+                        print("\n1. Pay Electricity Bill")
+                        print("2. Pay Water Bill")
+                        print("3. Pay Internet Bill")
+                        print("4. Pay Phone Bill")
+                        print("5. Pay Gas Bill")
+                        print("6. Back")
+
+
+                        bill_choice = input("Pls enter the Bill You would like to Pay: ")
+
+
+                        if bill_choice == "1":
+                            pay_electricity = int(input("Pls enter the amount you would like to pay your Electricity bill: "))
+
+                            if pay_electricity <= 0:
+                                print("Bill cannot be a negative or equal to Zero!")
+                                continue
+
+
+                            if found_account.balance < pay_electricity:
+                                print("Insufficient Funds")
+                                continue
+
+                            found_account.balance -= pay_electricity
+                            found_account.money_spent_this_month += pay_electricity
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
+                            found_account.transaction_history.append("Paid Electricty Bill: " + str(pay_electricity))
+                            save_accounts()
+                            print("Paid Electricty Bill Successfully")
+
+
+
+
+                        elif bill_choice == "2":
+                            pay_water = int(input("Pls enter the amount you would like to pay your Water Bill: "))
+
+                            if pay_water <= 0:
+                                print("Bill cannot be a negative or equal to Zero!")
+                                continue
+
+                            if found_account.balance < pay_water:
+                                print("Insufficient Funds")
+                                continue
+
+
+                            found_account.balance -= pay_water
+                            found_account.money_spent_this_month += pay_water
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
+                            found_account.transaction_history.append("Paid Water Bill: " + str(pay_water))
+                            save_accounts()
+                            print("Paid Water Bill Successfully!")
+
+
+
+                        elif bill_choice == "3":
+                            pay_interent = int(input("Pls enter the amount you would like to pay your Interent Bill: "))
+
+
+                            if pay_interent <= 0:
+                                print("Bill cannot be a negative or equal to Zero!")
+                                continue
+
+                            if found_account.balance < pay_interent:
+                                print("Insufficient Funds")
+                                continue
+
+
+                            found_account.balance -= pay_interent
+                            found_account.money_spent_this_month += pay_interent
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
+                            found_account.transaction_history.append("Paid Interent Bill: " + str(pay_interent))
+                            save_accounts()
+                            print("Paid Interent Bill Successfully!")
+
+
+
+
+                        elif bill_choice == "4":
+                            pay_phone = int(input("Pls enter the amount you would like to pay your Phone Bill: "))
+
+                            if pay_phone <= 0:
+                                print("Bill cannot be a negative or equal to Zero!")
+                                continue
+
+                            if found_account.balance < pay_phone:
+                                print("Insufficient Funds")
+                                continue
+
+
+                            found_account.balance -= pay_phone
+                            found_account.money_spent_this_month += pay_phone
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
+                            found_account.transaction_history.append("Paid Phone Bill: " + str(pay_phone))
+                            save_accounts()
+                            print("Paid Phone Bill Successfully!")
+
+
+
+
+
+
+
+
+                        elif bill_choice == "5":
+                            pay_gas = int(input("Pls enter the amount you would like to pay your Gas Bill: "))
+
+                            if pay_gas <= 0:
+                                print("Bill cannot be a negative or equal to Zero!")
+                                continue
+
+
+                            if found_account.balance < pay_gas:
+                                print("Insufficient Funds")
+                                continue
+
+
+                            found_account.balance -= pay_gas
+                            found_account.money_spent_this_month += pay_gas
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                            
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
+                            found_account.transaction_history.append("Paid Gas Bill: " + str(pay_gas))
+                            save_accounts()
+                            print("Paid Gas Bill Successfully!")
+
+
+
+
+
+                        elif bill_choice == "6":
+                            print("Have a Great Day Bye!")
+                            break
+
+                        else:
+                            print("Invalid Choice pls retry!")
+
+
+
+
+
+
+        
+
+
+
+
+
+
+    elif choice == "24":
 
         if found_account.account_locked:
                 print("Account is locked!")
@@ -1687,7 +1903,7 @@ while True:
 
 
 
-    elif choice == "24":
+    elif choice == "25":
         print("Have a good day. Bye!")
         break
 
