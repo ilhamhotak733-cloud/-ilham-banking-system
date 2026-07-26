@@ -30,6 +30,7 @@ class BankAccount:
         self.debit_card()
         self.monthly_budget = 0
         self.money_spent_this_month = 0
+        self.noifications = []
 
         
 
@@ -327,9 +328,22 @@ def save_accounts():
     file = open("bank_data.txt", "w")
 
     for acc in accounts:
+        noifications = []
+        for noification in acc.noifications:
+
+            message = noification.get("message")
+            status = noification.get("status")
+            date = str(noification.get("date", "Unknown"))
+            time = noification.get("time", "unknown")
+            noification = message + "|" + status + "|" + date + "|" + time
+            noifications.append(str(message + ";" + status + ";" + date + ";" + time))
+            
+
+
+        noifications = "|".join(noifications)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + history 
         file.write(line + "\n")
 
     file.close()
@@ -352,6 +366,7 @@ def load_accounts():
 
         data = line.strip().split(",")
 
+
         name = data[0]
         age = int(data[1])
         pin = data[2]
@@ -367,7 +382,31 @@ def load_accounts():
         expiration_year = int(data[12])
         monthly_budget = int(data[13])
         money_spent_this_month = int(data[14])
-        transaction_history = data[15].split("|")
+        saved_noifications = data[15].split("|")
+
+        noifications = []
+
+        for noification in saved_noifications:
+            
+            if noification == "":
+                continue
+
+            part_list = noification.split(";")
+            message = part_list[0]
+            status = part_list[1]
+            date = part_list[2]
+            time = part_list[3]
+
+            notification = {
+                "message": message,
+                "status": status,
+                "date" : date,
+                "time" : time
+            }
+
+            noifications.append(notification)
+
+        transaction_history = data[16].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -381,6 +420,7 @@ def load_accounts():
         account.expiration_year = expiration_year
         account.monthly_budget = monthly_budget
         account.money_spent_this_month = money_spent_this_month
+        account.noifications = noifications
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -398,6 +438,14 @@ def load_accounts():
 load_accounts()
 
 while True:
+    unread_count = 0
+    if found_account is not None:
+        for noification in found_account.noifications:
+            status = noification.get("status")
+            if status == "unread":
+                unread_count = unread_count + 1
+
+
 
     print("\n1. Create Account")
     print("2. Login")
@@ -422,8 +470,9 @@ while True:
     print("21. View Remaining Budget")
     print("22. Reset Monthly Budget")
     print("23. Pay Bills")
-    print("24. Show All Accounts")
-    print("25. Exit")
+    print(f"24. Show Notifications ({unread_count})")
+    print("25. Show All Accounts")
+    print("26. Exit")
 
 
     choice = input("Choose an option: ")
@@ -537,6 +586,17 @@ while True:
         found_account.deposit(deposit)
 
         print("Deposit was successful!")
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current__today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append(
+                { 
+                    "message" : "Deposit was successfully", 
+                    "status" : "unread",
+                    "date" : date_today_time,
+                    "time" : current__today_time
+                }
+            )
         print("New balance:", found_account.balance)
         save_accounts()
 
@@ -576,6 +636,15 @@ while True:
         if success:
             print("Withdrawal successful!")
             print("New balance:", found_account.balance)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Withdraw Was Successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             found_account.money_spent_this_month += withdraw_amount
             budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
             if found_account.money_spent_this_month > found_account.monthly_budget:
@@ -645,6 +714,15 @@ while True:
             recipient_account.deposit(transfer_amount)
             print("Transfer successful!")
             print("Your new balance:", found_account.balance)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Transfer was successfully!!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             found_account.money_spent_this_month += transfer_amount
             budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
 
@@ -660,6 +738,7 @@ while True:
             elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
                 print("WARNING!!")
                 print("You have used 80% of your monthly budget")
+
                 
             found_account.transaction_history.append("Transferred: " + str(transfer_amount))
             recipient_account.transaction_history.append("Received: " + str(transfer_amount))
@@ -701,6 +780,15 @@ while True:
             print(message)
             print("New balance:", found_account.balance)
             print("New debt:", found_account.debt)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Borrowed money successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             save_accounts()
         else:
             print(message)
@@ -752,6 +840,15 @@ while True:
             print("Repay successful")
             print("New Balance:", found_account.balance)
             print("New Debt:", found_account.debt)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Repayed Debt Successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             save_accounts()
         else:
             print("Repayment failed")
@@ -827,6 +924,15 @@ while True:
             continue
 
         success = found_account.update_pin(new_pin)
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+            "message": "Withdraw Was Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
         save_accounts()
         
         if success:
@@ -856,6 +962,18 @@ while True:
         if admin_password != correct_admin_password:
             print("Wrong admin password pls retry!")
             continue
+
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+
+        found_account.noifications.append({
+            "message": "Logged in to admin Account Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
+        save_accounts()
 
 
 
@@ -888,6 +1006,15 @@ while True:
                 else:
                     for acc in accounts:
                         acc.show_info()
+                    date_today_time = datetime.date.today()
+                    current_date_time = datetime.datetime.now()
+                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                    found_account.noifications.append({
+                        "message": "Checked All Accounts Successfully!!",
+                        "status": "unread",
+                        "date": date_today_time,
+                        "time": current_today_time
+                    })
             
 
 
@@ -903,6 +1030,15 @@ while True:
                     if acc.name == name:
                         acc.show_info()
                         found_account = acc
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                found_account.noifications.append({
+                    "message": "Searched Account Successfully!",
+                    "status": "unread",
+                    "date": date_today_time,
+                    "time": current_today_time
+                })
                 if found_account == None:
                     print("No accounts were found Admin")
 
@@ -930,6 +1066,15 @@ while True:
 
                 accounts.remove(found_account)
                 print("Account successfully deleted Admin!")
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                found_account.noifications.append({
+                    "message": "Successfully Deleted Account!",
+                    "status": "unread",
+                    "date": date_today_time,
+                    "time": current_today_time
+                })
                 save_accounts()
             
 
@@ -947,6 +1092,15 @@ while True:
                 for acc in accounts:
                     total_balance += acc.balance
                 print("The Total Bank Balance is:", total_balance, "Admin")
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                found_account.noifications.append({
+                    "message": "Checked Bank Balance Successfully!",
+                    "status": "unread",
+                    "date": date_today_time,
+                    "time": current_today_time
+                })
 
 
 
@@ -961,6 +1115,15 @@ while True:
                 for acc in accounts:
                     total_debt += acc.debt
                 print("The Total Bank Debt is:", total_debt, "Admin")
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                found_account.noifications.append({
+                                "message": "Checked Bank Debt Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
 
 
 
@@ -989,6 +1152,15 @@ while True:
                 if confirm_unlock == "yes":
                     found_account.account_locked = False
                     found_account.failed_login_attempts = 0 
+                    date_today_time = datetime.date.today()
+                    current_date_time = datetime.datetime.now()
+                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                    found_account.noifications.append({
+                        "message": "Unlocked Account Successfully!",
+                        "status": "unread",
+                        "date": date_today_time,
+                        "time": current_today_time
+                    })
                     save_accounts()
                     print("Account was successfully unlocked!. Admin!")
                     print("Thank you admin for confirming!")
@@ -1032,6 +1204,15 @@ while True:
 
         print(name,"'s", "Current Credit Score is:", found_account.credit_score)
         print("Your Credit Rating is:", found_account.credit_rating())
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+            "message": "Checked Current Credit Score Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
 
 
 
@@ -1054,6 +1235,15 @@ while True:
                 continue
         
         print(acc.name, "s", "Current Saving Balance Is: ", found_account.saving_balance)
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+            "message": "Checked Current Saving Balance Successfuly!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
 
 
 
@@ -1075,6 +1265,15 @@ while True:
             continue
 
         print(acc.name, "s", "Current Checking Balance Is: ", found_account.balance)
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+                        "message": "Checked Current Checking Balance Successfully!",
+                        "status": "unread",
+                        "date": date_today_time,
+                        "time": current_today_time
+                    })
 
 
 
@@ -1109,6 +1308,15 @@ while True:
             print("Transferring the amount to your savings account was a success!")
             print("Your New Saving Balance Is: ", found_account.saving_balance)
             print("Your New Checking Balance Is: ", found_account.balance)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Transfered money to Savings Acccount Successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             save_accounts()
 
         else:
@@ -1150,6 +1358,15 @@ while True:
             print("Transferring the amount to your checkings account was a success!")
             print("Your New Checking Balance Is: ", found_account.balance)
             print("Your New Savings Balance Is: ", found_account.saving_balance)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Transfered Money to Checkings Account Successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             save_accounts()
 
 
@@ -1245,6 +1462,18 @@ while True:
             status = "Locked"
         else:
             status = "Unlocked"
+
+
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+
+        found_account.noifications.append({
+            "message": "Bank Statement was Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
         
 
         print("---------------")
@@ -1298,6 +1527,16 @@ while True:
         if found_account.check_pin(pin_number):
             found_account.failed_login_attempts = 0
             print("ATM login was succcessfull")
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Atm Login was Successfully!!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
+            save_accounts()
 
 
 
@@ -1344,6 +1583,15 @@ while True:
                         print("Pls take your cash: ",withdraw_cash)
                         print("New balance:", found_account.balance)
                         found_account.money_spent_this_month += withdraw_cash
+                        date_today_time = datetime.date.today()
+                        current_date_time = datetime.datetime.now()
+                        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                        found_account.noifications.append({
+                            "message": "Withdraw Was Successful from Atm!",
+                            "status": "unread",
+                            "date": date_today_time,
+                            "time": current_today_time
+                        })
                         budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
 
                         if found_account.money_spent_this_month > found_account.monthly_budget:
@@ -1382,6 +1630,15 @@ while True:
 
                     print("Deposit amount of Cash was successfully!")
                     print("New Balance: ", found_account.balance)
+                    date_today_time = datetime.date.today()
+                    current_date_time = datetime.datetime.now()
+                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                    found_account.noifications.append({
+                        "message": "Deposit Was Successfull from Atm!",
+                        "status": "unread",
+                        "date": date_today_time,
+                        "time": current_today_time
+                    })
                     save_accounts()
 
                 
@@ -1439,6 +1696,15 @@ while True:
                                 print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Transferred: " + str(transfer_cash))
                             recipient_transfer_account.transaction_history.append("Received: " + str(transfer_cash))
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Transfer Was Successfull from Atm!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
                             save_accounts()
                     else:
                         print("Insufficient funds for transfer!")
@@ -1508,6 +1774,15 @@ while True:
             save_accounts()
             print("Debit Card replacements was successfully!")
             print("Your new debit card Information is: ", found_account.card_number, found_account.cvv, found_account.expiration_month, found_account.expiration_year)
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Debit Card replacements was successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
             print("------------------------------")
 
         else:
@@ -1556,6 +1831,11 @@ while True:
             print("----------------- ")
             print("Your Debit Card expiration Year is: ", found_account.expiration_year)
             print("----------------- ")
+            found_account.noifications.append({
+                "message": "Checked Debit Card Info Successfully!",
+                "status": "unread"
+            })
+            
 
 
         else:
@@ -1590,6 +1870,15 @@ while True:
         save_accounts()
         found_account.transaction_history.append("Monthly Budget is: " +  str(monthly_budget_money))
         print("Congrats Your Monthly Budget is: ", found_account.monthly_budget)
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+            "message": "Set Monthly Budget Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
 
 
 
@@ -1614,6 +1903,15 @@ while True:
         print("Your Monthly Budget is: ", found_account.monthly_budget)
         print("You Spent: ", found_account.money_spent_this_month)
         print("Your Remaining Budget is: ", remaining_budget)
+        date_today_time = datetime.date.today()
+        current_date_time = datetime.datetime.now()
+        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+        found_account.noifications.append({
+            "message": "Checked Remaining Budget Successfully!",
+            "status": "unread",
+            "date": date_today_time,
+            "time": current_today_time
+        })
 
 
 
@@ -1635,6 +1933,15 @@ while True:
             found_account.transaction_history.append("Monthly spent budget Reset!")
             save_accounts()
             print("Monthly Spent Budget Successfully Reseted!")
+            date_today_time = datetime.date.today()
+            current_date_time = datetime.datetime.now()
+            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+            found_account.noifications.append({
+                "message": "Reseted Money spent This Month Successfully!",
+                "status": "unread",
+                "date": date_today_time,
+                "time": current_today_time
+            })
         
         elif confirm_reset == "NO":
             print("Thank you for confirming your monthly spent budget Has NOT been reseted!")
@@ -1659,6 +1966,8 @@ while True:
         if found_account.account_locked:
             print("Account is Locked")
             continue
+
+
 
 
 
@@ -1709,6 +2018,15 @@ while True:
                             found_account.transaction_history.append("Paid Electricty Bill: " + str(pay_electricity))
                             save_accounts()
                             print("Paid Electricty Bill Successfully")
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Paid Electricty Bill Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
 
 
 
@@ -1745,6 +2063,15 @@ while True:
                             found_account.transaction_history.append("Paid Water Bill: " + str(pay_water))
                             save_accounts()
                             print("Paid Water Bill Successfully!")
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Paid Water Bill Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
 
 
 
@@ -1781,6 +2108,15 @@ while True:
                             found_account.transaction_history.append("Paid Interent Bill: " + str(pay_interent))
                             save_accounts()
                             print("Paid Interent Bill Successfully!")
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Paid Interent Bill Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
 
 
 
@@ -1817,6 +2153,17 @@ while True:
                             found_account.transaction_history.append("Paid Phone Bill: " + str(pay_phone))
                             save_accounts()
                             print("Paid Phone Bill Successfully!")
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Paid Phone Bill Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
+                            
+                
 
 
 
@@ -1858,6 +2205,16 @@ while True:
                             found_account.transaction_history.append("Paid Gas Bill: " + str(pay_gas))
                             save_accounts()
                             print("Paid Gas Bill Successfully!")
+                            date_today_time = datetime.date.today()
+                            current_date_time = datetime.datetime.now()
+                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                            found_account.noifications.append({
+                                "message": "Paid Gas Bill Successfully!",
+                                "status": "unread",
+                                "date": date_today_time,
+                                "time": current_today_time
+                            })
+                            
 
 
 
@@ -1875,6 +2232,77 @@ while True:
 
 
 
+
+
+
+
+    elif choice == "24":
+        if found_account is None:
+            print("Pls Login in first")
+            continue
+
+
+        if found_account.account_locked:
+            print("Account is Locked!")
+            continue
+
+
+        count = 1
+
+        for noification in reversed(found_account.noifications):
+            message = noification.get("message")
+            noification["status"] = "read"
+            status = noification.get("status")
+            date = str(noification.get("date"))
+            time = noification.get("time")
+            print(count, f"{message} ({status})")
+            print(f"{date} {time}")
+            count = 1 + count
+        save_accounts()
+
+
+        while True:
+        
+        
+        
+                        print("\n1. Delete A Notification")
+                        print("2. Clear all Notifications")
+                        print("3. Back")
+
+                        notification_choice = input("Pls Choose a choice!: ")
+
+                        if notification_choice == "1":
+                            delete_notification = int(input("Pls enter the Notification Number to delete!: "))
+
+                            list_index = len(found_account.noifications) - delete_notification 
+                            if 0 <= list_index < len(found_account.noifications):
+                                found_account.noifications.pop(list_index)
+                                save_accounts()
+                                print("Deleted Notification Successfully!")
+                            else:
+                                print("Invalid notification Number")
+
+                        elif notification_choice == "2":
+                            check_clear = input("Are you sure you want to Delete all Notifications (yes/no)").lower()
+                            if check_clear == "yes":
+                                found_account.noifications.clear()
+                                save_accounts()
+                                print("All notifications Deleted successfully!")
+                            elif check_clear == "no":
+                                print("Notifications were not deleted!")
+
+
+                        elif notification_choice == "3":
+                            print("Good bye!")
+                            break
+
+                        else:
+                            print("Invalid choice!")
+
+
+                            
+
+                    
         
 
 
@@ -1882,7 +2310,19 @@ while True:
 
 
 
-    elif choice == "24":
+
+
+
+
+
+        
+
+
+
+
+
+
+    elif choice == "25":
 
         if found_account.account_locked:
                 print("Account is locked!")
@@ -1903,7 +2343,7 @@ while True:
 
 
 
-    elif choice == "25":
+    elif choice == "26":
         print("Have a good day. Bye!")
         break
 
