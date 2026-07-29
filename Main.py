@@ -31,6 +31,7 @@ class BankAccount:
         self.monthly_budget = 0
         self.money_spent_this_month = 0
         self.noifications = []
+        self.financial_goals = []
 
         
 
@@ -337,13 +338,29 @@ def save_accounts():
             time = noification.get("time", "unknown")
             noification = message + "|" + status + "|" + date + "|" + time
             noifications.append(str(message + ";" + status + ";" + date + ";" + time))
+
+        financial_goals = []
+        for financial_goal in acc.financial_goals:
+
+            goal_name = financial_goal.get("goal_name")
+            goal_target_amount = str(financial_goal.get("goal_target_amount"))
+            goal_progress = str(financial_goal.get("goal_progress"))
+            status = financial_goal.get("status")
+            financial_goal = goal_name + "|" + goal_target_amount + "|" + goal_progress + "|" + status
+            financial_goals.append(str(goal_name + ";" + goal_target_amount + ";" + goal_progress + ";" + status))
+
+
+
+
+
             
 
 
         noifications = "|".join(noifications)
+        financial_goals = "|".join(financial_goals)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + history 
         file.write(line + "\n")
 
     file.close()
@@ -384,6 +401,7 @@ def load_accounts():
         money_spent_this_month = int(data[14])
         saved_noifications = data[15].split("|")
 
+
         noifications = []
 
         for noification in saved_noifications:
@@ -406,7 +424,33 @@ def load_accounts():
 
             noifications.append(notification)
 
-        transaction_history = data[16].split("|")
+
+
+        saved_financial_goals = data[16].split("|")
+
+        financial_goals = []
+
+        for financial_goal in saved_financial_goals:
+
+            if financial_goal == "":
+                continue
+
+
+            financial_part_list = financial_goal.split(";")
+            goal_name = financial_part_list[0]
+            goal_target_amount = int(financial_part_list[1])
+            goal_progress = int(financial_part_list[2])
+            status = financial_part_list[3]
+
+            financial_goal = {
+                "goal_name": goal_name,
+                "goal_target_amount": goal_target_amount,
+                "goal_progress": goal_progress,
+                "status": status
+            }
+            financial_goals.append(financial_goal)
+
+        transaction_history = data[17].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -421,6 +465,7 @@ def load_accounts():
         account.monthly_budget = monthly_budget
         account.money_spent_this_month = money_spent_this_month
         account.noifications = noifications
+        account.financial_goals = financial_goals
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -471,8 +516,9 @@ while True:
     print("22. Reset Monthly Budget")
     print("23. Pay Bills")
     print(f"24. Show Notifications ({unread_count})")
-    print("25. Show All Accounts")
-    print("26. Exit")
+    print("25. Finanical Goals")
+    print("26. Show All Accounts")
+    print("27. Exit")
 
 
     choice = input("Choose an option: ")
@@ -532,28 +578,30 @@ while True:
 
         for acc in accounts:
             if name == acc.name:
-                    found_account = acc
+
+                if acc.account_locked:
+                    print("Account already locked")
                     break
-        else:
-            print("Account not found!")
-            continue
-        if found_account.account_locked:
-                print("Account already locked")
-                continue
-        elif found_account.check_pin(pin):
-            found_account.failed_login_attempts = 0
-            print("Log in successful")
-        else:
-            print("Invalid PIN!")
 
-            found_account.failed_login_attempts += 1
-            tries_left = 3 - found_account.failed_login_attempts
-            print("You got", tries_left, "Tries Left!")
+                if acc.check_pin(pin):
+                    found_account = acc
+                    found_account.failed_login_attempts = 0
+                    print("Log in successful")
+                    break
+                
 
-            if found_account.failed_login_attempts == 3:
-                found_account.account_locked = True
-                save_accounts()
-                print("To many tries account has been locked!")
+                else:
+                    acc.failed_login_attempts += 1
+                    tries_left = 3 - acc.failed_login_attempts
+                    print("Invalid PIN!")
+                    print("You got", tries_left, "Tries Left!")
+
+                    if acc.failed_login_attempts == 3:
+                        acc.account_locked = True
+                        save_accounts()
+                        print("Too many tries, account has been locked!")
+                    break
+
 
 
 
@@ -2300,30 +2348,357 @@ while True:
                             print("Invalid choice!")
 
 
-                            
-
-                    
-        
-
-
-
-
-
-
-
-
-
-
-
-        
-
 
 
 
 
 
     elif choice == "25":
+        if found_account is None:
+            print("Pls login first!")
+            continue
 
+
+        if found_account.account_locked:
+            print("Account is Locked!")
+            continue
+
+
+        while True:
+                
+                
+                
+                                print("\n1. Create A Goal")
+                                print("2. View Goals")
+                                print("3. Contribute to A Goal")
+                                print("4. Edit A Goal")
+                                print("5. Delete A Goal")
+                                print("6. Clear All Goals")
+                                print("7. Back")
+
+
+                                goal_choice = input("Pls Choose an option: ")
+
+
+                                if goal_choice == "1":
+
+                                    goal_progress = 0
+
+                                    goal_name = input("Pls Enter the name of the Goal You want to Reach: ")
+
+                                    goal_target_amount = int(input("Pls enter the Goal Target Amount: "))
+
+                                    found_account.financial_goals.append({
+                                        "goal_name": goal_name,
+                                        "goal_target_amount": goal_target_amount,
+                                        "goal_progress": goal_progress,
+                                        "status": "Not completed"
+                                    })
+                                    print("Congratualtion You Sucessfully Made A Goal!")
+                                    save_accounts()
+
+
+                                elif goal_choice == "2":
+                                    if len(found_account.financial_goals) == 0:
+                                        print("No Goals Set Yet!")
+
+                                    else:
+                                        for financial_goal in found_account.financial_goals:
+                                            goal_name = financial_goal.get("goal_name")
+                                            goal_target_amount = financial_goal.get("goal_target_amount")
+                                            goal_progress = financial_goal.get("goal_progress")
+                                            status = financial_goal.get("status")
+                                            
+
+                                            remaining_goal_amount = goal_target_amount - goal_progress
+                                            goal_percent_completed = (goal_progress/goal_target_amount) * 100
+
+                                            print("----------------------------------------------------")
+                                            print("Your Goal Name is: ", goal_name)
+                                            print(f"Your Goals Target Amount is: {goal_target_amount}$")
+                                            print(f"Your Goals Progress is: {goal_progress}$")
+                                            print("Your Goals Status is: ", status)
+                                            print(f"Your Remaining Goal Target amount is: {remaining_goal_amount}$")
+                                            print(f"Your Current Goal Completed Progress is: {goal_percent_completed}%")
+                                            print("----------------------------------------------------")
+
+
+
+
+
+
+
+
+
+                                elif goal_choice == "3":
+                                    contribute_goal = int(input("Pls Enter the Goals Number to contribute to: "))
+
+
+                                    goal_list_index = contribute_goal - 1
+
+                                    if 0 <= goal_list_index < len(found_account.financial_goals):
+                                        selected_goal = found_account.financial_goals[goal_list_index]
+
+                                        contribute_amount = int(input("Pls Enter the Amount You would Like to Contribute: "))
+
+                                        if contribute_amount <= 0:
+                                            print("Contributed amount must be greater than zero!")
+                                            continue
+
+                                        if  contribute_amount > found_account.saving_balance:
+                                            print("Savings account balance must be greater then contributed Amount!")
+                                            continue
+
+                                        if (selected_goal["goal_progress"] + contribute_amount) > selected_goal["goal_target_amount"]:
+                                            print("Goals Progress Cannot Be Higher than Goals Target Amount!")
+                                            continue
+                                        found_account.saving_balance -= contribute_amount
+                                        selected_goal["goal_progress"] += contribute_amount
+                                        if selected_goal["goal_progress"] == selected_goal["goal_target_amount"]:
+                                            selected_goal["status"] = "Completed"
+                                            date_today_time = datetime.date.today()
+                                            current_date_time = datetime.datetime.now()
+                                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                            found_account.noifications.append({
+                                            "message": "Congratulation You have Reached Your Goals Target Amount Successfully!",
+                                            "status": "unread",
+                                            "date": date_today_time,
+                                            "time": current_today_time
+                                        })
+                                                                        
+                                        found_account.transaction_history.append("Contributed to Goals target amount: " + str(contribute_amount))
+                                        save_accounts()
+                                        print("Contributed To Your Goal Successfully!")
+
+
+
+
+
+
+
+
+                                elif goal_choice == "4":
+                                    edit_goal = int(input("Pls enter the Goal's Number to edit "))
+
+                                    goal_list_index = edit_goal - 1
+                                        
+                                    if 0 <= goal_list_index < len(found_account.financial_goals):
+                                        selected_goal = found_account.financial_goals[goal_list_index]
+
+                                        while True:
+
+
+
+                                                print("\n1. Edit Goal Name")
+                                                print("2. Edit Goal Target Amount")
+                                                print("3. Back")
+
+
+                                                edit_choice = input("Pls Choose a Choice: ")
+
+
+
+
+
+                                                if edit_choice == "1":
+                                                    check_name_edit = input("Are YOU SURE you want to CHANGE YOUR GOAL NAME (yes/no)").upper()
+                                                    if check_name_edit == "YES":
+                                                        change_goal_name = input("Pls enter the new Goal Name: ")
+                                                        selected_goal["goal_name"] = change_goal_name
+                                                        save_accounts()
+                                                        print("Updated Goal's Name Successfully!")
+                                                        date_today_time = datetime.date.today()
+                                                        current_date_time = datetime.datetime.now()
+                                                        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                        found_account.noifications.append({
+                                                            "message": "Updated Goal's Name Successfully!",
+                                                            "status": "unread",
+                                                            "date": date_today_time,
+                                                            "time": current_today_time
+                                                        })
+                                                        break
+
+                                                    elif check_name_edit == "NO":
+                                                        print("Thank You for Confirming your goal name will not change!")
+                                                        continue
+
+                                                    else:
+                                                        print("Pls Enter Either Yes OR no")
+                                                        continue
+
+
+
+
+
+
+
+                                                elif edit_choice == "2":
+                                                    check_target_amount_edit = input("Are YOU SURE you want to CHANGE YOUR GOAL'S TARGET AMOUNT (yes/no)").upper()
+                                                    if check_target_amount_edit == "YES":
+                                                        change_goal_target_amount = int(input("Pls Enter Your New Goals Target Amount: "))
+
+                                                        if change_goal_target_amount <= 0:
+                                                            print("New Goals Target Amount MUST be Greater then ZERO!")
+                                                            continue
+
+                                                        if change_goal_target_amount < selected_goal["goal_progress"]:
+                                                            print("New Goal's Target Amount Cannot be Less then Current Goal's Progress!")
+                                                            continue
+
+                                                        selected_goal["goal_target_amount"] = change_goal_target_amount
+                                                        save_accounts()
+                                                        print("Successfully Updated Goal's Target Amount")
+                                                        date_today_time = datetime.date.today()
+                                                        current_date_time = datetime.datetime.now()
+                                                        current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                        found_account.noifications.append({
+                                                        "message": "Updated Goal's Target Amount Successfully!",
+                                                        "status": "unread",
+                                                        "date": date_today_time,
+                                                        "time": current_today_time
+                                                    })
+                                                        break
+
+                                                    elif check_target_amount_edit == "NO":
+                                                        print("Thank You for confirming Your Goal's Target Amount Has Not been Updated")
+                                                        continue
+
+                                                    else:
+                                                        print("Pls Enter Either Yes OR No!")
+                                                        
+
+
+
+
+
+                                                elif edit_choice == "3":
+                                                    print("Good Bye!")
+                                                    break
+                                                else:
+                                                    print("Wrong Choice pls Retry!")
+
+
+
+
+
+
+
+                                elif goal_choice == "5":
+                                    if len(found_account.financial_goals) == 0:
+                                        print("No Goals Set Yet!")
+
+                                    else:
+                                        count = 1
+                                        for financial_goal in found_account.financial_goals:
+                                            goal_name = financial_goal.get("goal_name")
+                                            
+                                            print(count, goal_name)
+                                            count = count + 1
+                                        delete_goal_name = int(input("Pls enter the Goal's Number to Delete: "))
+                                        goal_list_index = delete_goal_name - 1
+                                                                                
+                                        if 0 <= goal_list_index < len(found_account.financial_goals):
+                                            selected_goal = found_account.financial_goals[goal_list_index]
+
+                                            check_delete_goal_name = input("Are YOU SURE You WANT to DELETE this GOAL? (yes/no)").upper()
+                                            if check_delete_goal_name == "YES":
+                                                deleted_goal_name = selected_goal["goal_name"]
+                                                found_account.financial_goals.pop(goal_list_index)
+                                                found_account.transaction_history.append("Deleted This Goal!: " + deleted_goal_name)
+
+                                                date_today_time = datetime.date.today()
+                                                current_date_time = datetime.datetime.now()
+                                                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                found_account.noifications.append({
+                                                    "message": "DELETED THIS GOAL!: " + deleted_goal_name,
+                                                    "status": "unread",
+                                                    "date": date_today_time,
+                                                    "time": current_today_time
+                                                })
+                                                save_accounts()
+
+                                                print("Deleted", selected_goal["goal_name"], "Goal Successfully!")
+                                                break
+
+                                            elif check_delete_goal_name == "NO":
+                                                print("Thank You for Confirming No Goal Has Been Deleted!")
+                                                continue
+                                            else:
+                                                print("Pls Choose Either Yes OR No!")
+                                                continue
+
+
+
+
+
+
+
+                                elif goal_choice == "6":
+                                    if len(found_account.financial_goals) == 0:
+                                        print("No Goals Set Yet!")
+
+                                    else:
+                                        print("------------------------------------------------------------------")
+                                        print("WARNING!")
+                                        print("------------------------------------------------------------------")
+                                        print("THIS ACTION WILL PERMANENTLY DELETE ALL FINANCIAL GOALS!!")
+                                        print("------------------------------------------------------------------")
+                                        print("THIS ACTION CANNOT BE UNDONE!")
+                                        print("------------------------------------------------------------------")
+
+                                        
+                                        check_clear_goals = input("ARE YOU SURE YOU WANT TO CLEAR ALL GOALS\n"
+                                        "Type YES to continue or NO to cancel: ").upper()
+                                        if check_clear_goals == "YES":
+                                            found_account.financial_goals.clear()
+                                            found_account.transaction_history.append("Cleared All Financial Goals")
+                                            date_today_time = datetime.date.today()
+                                            current_date_time = datetime.datetime.now()
+                                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                            found_account.noifications.append({
+                                                "message": "All Financial Goals Have Been Deleted Successfully.",
+                                                "status": "unread",
+                                                "date": date_today_time,
+                                                "time": current_today_time
+                                            })
+                                            save_accounts()
+                                            print("All Financial Goals Have Been Deleted Successfully!")
+                                            break
+
+                                        elif check_clear_goals == "NO":
+                                            print("Thank You for CONFIRMING NO GOALS HAVE BEEN DELETED!")
+                                            continue
+                                        else:
+                                            print("Please Either Choose YES or NO")
+                                            continue
+
+
+                                
+                        
+                                
+
+
+                                            
+                                elif goal_choice == "7":
+                                    print("Good Bye!")
+                                    break
+                                else:
+                                    print("Wrong Option pls Retry!")
+
+                                            
+
+
+
+
+                                        
+
+                                
+
+
+
+
+
+    elif choice == "26":
         if found_account.account_locked:
                 print("Account is locked!")
                 continue
@@ -2343,7 +2718,7 @@ while True:
 
 
 
-    elif choice == "26":
+    elif choice == "27":
         print("Have a good day. Bye!")
         break
 
