@@ -32,6 +32,18 @@ class BankAccount:
         self.money_spent_this_month = 0
         self.noifications = []
         self.financial_goals = []
+        self.total_deposit = 0
+        self.total_withdrawn = 0
+        self.total_transferred = 0
+        self.total_bills_paid = 0
+        self.total_saved = 0
+        self.total_borrowed = 0
+        self.total_repaid = 0
+        self.total_contributed_to_goals = 0
+        self.total_received_transfers = 0
+        self.total_transfer_received = 0
+
+
 
         
 
@@ -68,6 +80,7 @@ class BankAccount:
 
     def deposit(self, amount):
         self.balance += amount
+        self.total_deposit += amount
         self.transaction_history.append("Deposited: " + str(amount))
 
 
@@ -81,6 +94,7 @@ class BankAccount:
         if amount > self.balance:
             return False
         self.balance -= amount
+        self.total_withdrawn += amount
         self.transaction_history.append("Withdrawn: " + str(amount))
         return True
 
@@ -107,6 +121,7 @@ class BankAccount:
 
         self.balance += amount
         self.debt += amount
+        self.total_borrowed += amount
 
         self.credit_score = self.credit_score - amount//50 
         if self.credit_score < 300:
@@ -125,6 +140,7 @@ class BankAccount:
     def repay(self, amount):
         self.balance -= amount
         self.debt -= amount
+        self.total_repaid += amount
 
         self.credit_score = self.credit_score + amount//50
         if self.credit_score > 850:
@@ -205,6 +221,7 @@ class BankAccount:
             return False
         self.balance -= amount
         self.saving_balance += amount
+        self.total_saved += amount
         self.transaction_history.append("Transferred to Savings: " + str(amount))
         return True
     
@@ -298,6 +315,17 @@ class BankAccount:
         largest_future_year = 2033
         random.randint(lowest_future_year, largest_future_year)
         self.expiration_year = random.randint(lowest_future_year, largest_future_year)
+
+
+
+    def remove_balance(self, amount):
+        if amount > self.balance:
+            return False
+        self.balance -= amount
+        return True
+            
+        
+
         
 
 
@@ -360,11 +388,10 @@ def save_accounts():
         financial_goals = "|".join(financial_goals)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + history 
         file.write(line + "\n")
 
     file.close()
-
 
 
 
@@ -450,7 +477,18 @@ def load_accounts():
             }
             financial_goals.append(financial_goal)
 
-        transaction_history = data[17].split("|")
+
+        total_deposit = int(data[17])
+        total_withdrawn = int(data[18])
+        total_transferred = int(data[19])
+        total_bills_paid = int(data[20])
+        total_saved = int(data[21])
+        total_borrowed = int(data[22])
+        total_repaid = int(data[23])
+        total_contributed_to_goals = int(data[24])
+        total_received_transfers = int(data[25])
+        total_transfer_received = int(data[26])
+        transaction_history = data[27].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -466,6 +504,16 @@ def load_accounts():
         account.money_spent_this_month = money_spent_this_month
         account.noifications = noifications
         account.financial_goals = financial_goals
+        account.total_deposit = total_deposit
+        account.total_withdrawn = total_withdrawn
+        account.total_transferred = total_transferred
+        account.total_bills_paid = total_bills_paid
+        account.total_saved = total_saved
+        account.total_borrowed = total_borrowed
+        account.total_repaid = total_repaid
+        account.total_contributed_to_goals = total_contributed_to_goals
+        account.total_received_transfers = total_received_transfers
+        account.total_transfer_received = total_transfer_received
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -517,8 +565,9 @@ while True:
     print("23. Pay Bills")
     print(f"24. Show Notifications ({unread_count})")
     print("25. Finanical Goals")
-    print("26. Show All Accounts")
-    print("27. Exit")
+    print("26. Spending Analytics")
+    print("27. Show All Accounts")
+    print("28. Exit")
 
 
     choice = input("Choose an option: ")
@@ -694,19 +743,23 @@ while True:
                 "time": current_today_time
             })
             found_account.money_spent_this_month += withdraw_amount
-            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
-            if found_account.money_spent_this_month > found_account.monthly_budget:
-                print("MAX BUDGET EXCEEDED!")
+            if found_account.monthly_budget == 0:
+                continue
 
-            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                print("WARNING ALMOST EXCEEDED!")
-                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
-                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                print("Your REMAINING Budget is: ", month_remaining_budget)
+            else:
+                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                if found_account.money_spent_this_month > found_account.monthly_budget:
+                    print("MAX BUDGET EXCEEDED!")
 
-            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                print("WARNING!!")
-                print("You have used 80% of your monthly budget")
+                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                    print("WARNING ALMOST EXCEEDED!")
+                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                    print("Your REMAINING Budget is: ", month_remaining_budget)
+
+                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                    print("WARNING!!")
+                    print("You have used 80% of your monthly budget")
             save_accounts()
         else:
             print("Insufficient funds!")
@@ -758,8 +811,11 @@ while True:
             print("You cannot transfer money to yourself!")
             continue
 
-        if found_account.withdraw(transfer_amount):
+        if found_account.remove_balance(transfer_amount):
             recipient_account.deposit(transfer_amount)
+            found_account.total_transferred += transfer_amount
+            recipient_account.total_transfer_received += transfer_amount
+            recipient_account.total_received_transfers += transfer_amount
             print("Transfer successful!")
             print("Your new balance:", found_account.balance)
             date_today_time = datetime.date.today()
@@ -771,21 +827,22 @@ while True:
                 "date": date_today_time,
                 "time": current_today_time
             })
-            found_account.money_spent_this_month += transfer_amount
-            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+            if found_account.monthly_budget != 0:
+                found_account.money_spent_this_month += transfer_amount
+                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
 
-            if found_account.money_spent_this_month > found_account.monthly_budget:
-                print("MAX BUDGET EXCEEDED!")
+                if found_account.money_spent_this_month > found_account.monthly_budget:
+                    print("MAX BUDGET EXCEEDED!")
 
-            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                print("WARNING ALMOST EXCEEDED!")
-                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
-                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                print("Your REMAINING Budget is: ", month_remaining_budget)
+                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                    print("WARNING ALMOST EXCEEDED!")
+                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                    print("Your REMAINING Budget is: ", month_remaining_budget)
 
-            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                print("WARNING!!")
-                print("You have used 80% of your monthly budget")
+                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                    print("WARNING!!")
+                    print("You have used 80% of your monthly budget")
 
                 
             found_account.transaction_history.append("Transferred: " + str(transfer_amount))
@@ -1640,21 +1697,25 @@ while True:
                             "date": date_today_time,
                             "time": current_today_time
                         })
-                        budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                        if found_account.monthly_budget == 0:
+                            continue
 
-                        if found_account.money_spent_this_month > found_account.monthly_budget:
-                            print("MAX BUDGET EXCEEDED!")
+                        else:
+                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
 
-                        elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                            print("WARNING ALMOST EXCEEDED!")
-                            print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                            if found_account.money_spent_this_month > found_account.monthly_budget:
+                                print("MAX BUDGET EXCEEDED!")
 
-                            month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                            print("Your REMAINING Budget is: ", month_remaining_budget)
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                print("WARNING ALMOST EXCEEDED!")
+                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
 
-                        elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                            print("WARNING!!")
-                            print("You have used 80% of your monthly budget")
+                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                print("Your REMAINING Budget is: ", month_remaining_budget)
+
+                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                print("WARNING!!")
+                                print("You have used 80% of your monthly budget")
                         save_accounts()
                     else:
                         print("Insufficient funds!")
@@ -1727,21 +1788,25 @@ while True:
                             print("Transfer successful!")
                             print("Your new balance:", found_account.balance)
                             found_account.money_spent_this_month += transfer_cash
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            if found_account.monthly_budget == 0:
+                                continue
 
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
 
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
 
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
 
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
+
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Transferred: " + str(transfer_cash))
                             recipient_transfer_account.transaction_history.append("Received: " + str(transfer_cash))
                             date_today_time = datetime.date.today()
@@ -2048,21 +2113,26 @@ while True:
 
                             found_account.balance -= pay_electricity
                             found_account.money_spent_this_month += pay_electricity
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            found_account.total_bills_paid += pay_electricity
+                            if found_account.monthly_budget == 0:
+                                continue
+
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
                             
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
                             
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Paid Electricty Bill: " + str(pay_electricity))
                             save_accounts()
                             print("Paid Electricty Bill Successfully")
@@ -2093,21 +2163,26 @@ while True:
 
                             found_account.balance -= pay_water
                             found_account.money_spent_this_month += pay_water
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            found_account.total_bills_paid += pay_water
+                            if found_account.monthly_budget == 0:
+                                continue
+
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
                             
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
                             
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Paid Water Bill: " + str(pay_water))
                             save_accounts()
                             print("Paid Water Bill Successfully!")
@@ -2138,21 +2213,26 @@ while True:
 
                             found_account.balance -= pay_interent
                             found_account.money_spent_this_month += pay_interent
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            found_account.total_bills_paid += pay_interent
+                            if found_account.monthly_budget == 0:
+                                continue
+
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
                             
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
                             
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Paid Interent Bill: " + str(pay_interent))
                             save_accounts()
                             print("Paid Interent Bill Successfully!")
@@ -2183,21 +2263,26 @@ while True:
 
                             found_account.balance -= pay_phone
                             found_account.money_spent_this_month += pay_phone
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            found_account.total_bills_paid += pay_phone
+                            if found_account.monthly_budget == 0:
+                                continue
+
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
                             
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
                             
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Paid Phone Bill: " + str(pay_phone))
                             save_accounts()
                             print("Paid Phone Bill Successfully!")
@@ -2235,21 +2320,25 @@ while True:
 
                             found_account.balance -= pay_gas
                             found_account.money_spent_this_month += pay_gas
-                            budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                            found_account.total_bills_paid += pay_gas
+                            if found_account.monthly_budget == 0:
+                                continue
+                            else:
+                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
                             
-                            if found_account.money_spent_this_month > found_account.monthly_budget:
-                                print("MAX BUDGET EXCEEDED!")
+                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                    print("MAX BUDGET EXCEEDED!")
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
-                                print("WARNING ALMOST EXCEEDED!")
-                                print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                    print("WARNING ALMOST EXCEEDED!")
+                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
                             
-                                month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
-                                print("Your REMAINING Budget is: ", month_remaining_budget)
+                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                    print("Your REMAINING Budget is: ", month_remaining_budget)
                             
-                            elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
-                                print("WARNING!!")
-                                print("You have used 80% of your monthly budget")
+                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                    print("WARNING!!")
+                                    print("You have used 80% of your monthly budget")
                             found_account.transaction_history.append("Paid Gas Bill: " + str(pay_gas))
                             save_accounts()
                             print("Paid Gas Bill Successfully!")
@@ -2454,6 +2543,7 @@ while True:
                                             continue
                                         found_account.saving_balance -= contribute_amount
                                         selected_goal["goal_progress"] += contribute_amount
+                                        found_account.total_contributed_to_goals += contribute_amount
                                         if selected_goal["goal_progress"] == selected_goal["goal_target_amount"]:
                                             selected_goal["status"] = "Completed"
                                             date_today_time = datetime.date.today()
@@ -2685,6 +2775,488 @@ while True:
                                 else:
                                     print("Wrong Option pls Retry!")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    elif choice == "26":
+        if found_account is None:
+            print("Pls Login First!")
+            continue
+
+        if found_account.account_locked:
+            print("Account is Locked!")
+            continue
+
+
+        while True:
+                        
+                        
+                        
+                                        print("\n1. Track Statistics")
+                                        print("2. Transaction Analysis")
+                                        print("3. Balance Summary")
+                                        print("4. Spending Summary")
+                                        print("5. Financial Health")
+                                        print("6. Analytics Dashboard")
+                                        print("7. Back")
+
+                                        analytics_choice = input("Pls Choose a Option: ")
+
+                                        if analytics_choice == "1":
+                                            print("-------------------------------------------------")
+                                            print("-------------------------------------------------")
+                                            print("            WELCOME TO TRACK STATISTICS          ")
+                                            print("-------------------------------------------------")
+                                            print("-------------------------------------------------")
+
+                                            
+                                            print(f"{'Total Amount Deposited':<30}: ${found_account.total_deposit:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total Amount Withdrawn':<30}: ${found_account.total_withdrawn:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total External Transfers Sent':<30}: ${found_account.total_transferred:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total Transfers Received':<30}: ${found_account.total_received_transfers:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total Amount Bills Paid':<30}: ${found_account.total_bills_paid:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Savings Account Balance':<30}: ${found_account.total_saved:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total Amount Borrowed':<30}: ${found_account.total_borrowed:,.2f}")
+                                            print("-------------")
+                                            print(f"{'Total Amount Repaid':<30}: ${found_account.total_repaid:,.2f}")
+                                            
+       
+                                            print("-------------------------------------------------") 
+                                            print("-------------------------------------------------")  
+                                            print("            TRACK STATISTICS COMPLETE            ")   
+                                            print("-------------------------------------------------")
+                                            print("-------------------------------------------------")
+
+
+                                        elif analytics_choice == "2":
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("               TRANSACTION ANALYSIS               ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                            print(f"{'Total Number of transactions':<30}: ", len(found_account.transaction_history))
+                                            print("--------------------")
+
+                                            largest_deposit = 0
+
+                                            for transaction in found_account.transaction_history:
+                                                if transaction.startswith("Deposited"):
+                                                    transaction.split(":")
+                                                    parts_lists = transaction.split(":")
+                                                    parts_lists = int(parts_lists[1])
+                                                    if parts_lists > largest_deposit:
+                                                        largest_deposit = parts_lists
+                                            
+                                            print(f"{'Largest Deposit':<30}: ${largest_deposit:,.2f}")
+
+                                            largest_withdrawn = 0
+
+                                            for transaction in found_account.transaction_history:
+                                                if transaction.startswith("Withdrawn"):
+                                                    transaction.split(":")
+                                                    withdrawn_parts_lists = transaction.split(":")
+                                                    withdrawn_parts_lists = int(withdrawn_parts_lists[1])
+                                                    if withdrawn_parts_lists > largest_withdrawn:
+                                                        largest_withdrawn = withdrawn_parts_lists
+                                            print("--------------------")
+                                            print(f"{'Largest Withdrawal':<30}: ${largest_withdrawn:,.2f}")
+
+                                            largest_transfer = 0
+
+                                            for transaction in found_account.transaction_history:
+                                                if transaction.startswith("Transferred"):
+                                                    transaction.split(":")
+                                                    transferred_parts_lists = transaction.split(":")
+                                                    transferred_parts_lists = int(transferred_parts_lists[1])
+                                                    if transferred_parts_lists > largest_transfer:
+                                                        largest_transfer = transferred_parts_lists
+                                            print("--------------------")
+                                            print(f"{'Largest Transfer Transaction':<30}: ${largest_transfer:,.2f}")
+
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("            TRANSACTION ANALYSIS COMPLETE         ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                        elif analytics_choice == "3":
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("                  BALANCE SUMMARY                 ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                           
+                                            print(f"{'Current Checking Balance':<30}: ${found_account.balance:,.2f}")
+                                            print("-----------")
+                                            print(f"{'Current Savings Balance':<30}: ${found_account.saving_balance:,.2f}")
+                                            print("-----------")
+                                            total_balance = found_account.balance + found_account.saving_balance
+                                            print(f"{'Total Balance':<30}: ${total_balance:,.2f}")
+                                            print("-----------")
+                                            print(f"{'Current Debt':<30}: ${found_account.debt:,.2f}")
+
+
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("               BALANCE SUMMARY COMPLETE           ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                        elif analytics_choice == "4":
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("                 SPENDING SUMMARY                 ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                            total_money_spent = found_account.total_withdrawn + found_account.total_transferred + found_account.total_bills_paid + found_account.total_contributed_to_goals
+                                            print(f"{'Total Amount Of Money Spent':<30}: ${total_money_spent:,.2f}")
+                                            print("----------------")
+
+                                            total_money_received = found_account.total_deposit + found_account.total_borrowed + found_account.total_received_transfers
+                                            print(f"{'Total Amount Of Money Received':<30}: ${total_money_received:,.2f}")
+                                            print("----------------")
+
+                                            if found_account.monthly_budget == 0:
+                                                print("Currently Have No Monthly Budget")
+                                            else:
+
+                                            
+                                                remaining_monthly_budget = found_account.monthly_budget - found_account.money_spent_this_month
+                                                print(f"{'Remaining Monthly Budget':<30}: ${remaining_monthly_budget:,.2f}")
+                                           
+
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("             SPENDING SUMMARY COMPLETE            ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                        elif analytics_choice == "5":
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("                  FINANCIAL HEALTH                ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+                                            print(f"Current Credit Score: {found_account.credit_score}")
+                                            print("------------------")
+
+                                            print(f"Max Loan: ${found_account.get_max_loan():,.2f}")
+                                            print("------------------")
+
+                                            account_status = found_account.account_locked
+                                            if found_account.account_locked is True:
+                                                account_status = found_account.account_locked
+                                                account_status = "Locked"
+                                            else:
+                                                account_status = "Unlocked"
+
+                                            print(f"Account Status: {account_status}")
+                                            print("------------------")
+
+                                            if found_account.monthly_budget == 0:
+                                                print("Budget Status: No Set")
+                                            else:                      
+                                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                                    print("Current Budget Status: EXCEEDED")
+                                                                            
+                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                                    print("Current Budget Status: WARNING ALMOST EXCEEDED!")
+                                                                            
+                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                                    print("Current Budget Status: WARNING")
+
+                                                else:
+                                                    print("Current Budget Status: Healthy")
+
+
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("             FINANCIAL HEALTH COMPLETE            ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+
+                                        elif analytics_choice == "6":
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("              BANK ANALYTICS DASHBOARD            ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                            print("╔══════════════════════════════════════╗")
+                                            print("║          TRACK STATISTICS            ║")
+                                            print("╚══════════════════════════════════════╝")
+                                            
+
+                                            print(f"{'Total Amount Deposited':<30}: ${found_account.total_deposit:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total Amount Withdrawn':<30}: ${found_account.total_withdrawn:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total External Transfers Sent':<30}: ${found_account.total_transferred:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total Transfers Received':<30}: ${found_account.total_transfer_received:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total Amount Bills Paid':<30}: ${found_account.total_bills_paid:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Savings Account Balance':<30}: ${found_account.total_saved:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total Amount Borrowed':<30}: ${found_account.total_borrowed:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Total Amount Repaid':<30}: ${found_account.total_repaid:,.2f}")
+
+                                        
+                                            print("╔══════════════════════════════════════╗")
+                                            print("║          TRANSACTION ANALYSIS        ║")
+                                            print("╚══════════════════════════════════════╝")
+                                            
+
+                                            print(f"{'Total number of transactions':<30}: ", len(found_account.transaction_history))
+                                            print("------------------")
+                                            
+                                            largest_deposit = 0
+                                            
+                                            for transaction in found_account.transaction_history:
+                                                    if transaction.startswith("Deposited"):
+                                                        transaction.split(":")
+                                                        parts_lists = transaction.split(":")
+                                                        parts_lists = int(parts_lists[1])
+                                                        if parts_lists > largest_deposit:
+                                                            largest_deposit = parts_lists
+                                                                                        
+                                            print(f"{'Largest Deposit':<30}: ${largest_deposit:,.2f}")
+                                            
+                                            largest_withdrawn = 0
+                                            
+                                            for transaction in found_account.transaction_history:
+                                                if transaction.startswith("Withdrawn"):
+                                                    transaction.split(":")
+                                                    withdrawn_parts_lists = transaction.split(":")
+                                                    withdrawn_parts_lists = int(withdrawn_parts_lists[1])
+                                                    if withdrawn_parts_lists > largest_withdrawn:
+                                                        largest_withdrawn = withdrawn_parts_lists
+                                            print("------------------")
+                                            print(f"{'Largest Withdrawal':<30}: ${largest_withdrawn:,.2f}")
+                                            
+                                            largest_transfer = 0
+                                            
+                                            for transaction in found_account.transaction_history:
+                                                if transaction.startswith("Transferred"):
+                                                    transaction.split(":")
+                                                    transferred_parts_lists = transaction.split(":")
+                                                    transferred_parts_lists = int(transferred_parts_lists[1])
+                                                    if transferred_parts_lists > largest_transfer:
+                                                        largest_transfer = transferred_parts_lists
+                                            print("------------------")
+                                            print(f"{'Largest Transfer Transaction':<30}: ${largest_transfer:,.2f}")
+
+
+                                            print("╔══════════════════════════════════════╗")
+                                            print("║            BALANCE SUMMARY           ║")
+                                            print("╚══════════════════════════════════════╝")
+
+                                            print(f"{'Current Checking Balance':<30}: ${found_account.balance:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Current Savings Balance':<30}: ${found_account.saving_balance:,.2f}")
+                                            print("------------------")
+                                            total_balance = found_account.balance + found_account.saving_balance
+                                            print(f"{'Total Balance':<30}: ${total_balance:,.2f}")
+                                            print("------------------")
+                                            print(f"{'Current Debt':<30}: ${found_account.debt:,.2f}")
+
+
+                                            print("╔══════════════════════════════════════╗")
+                                            print("║            SPENDING SUMMARY          ║")
+                                            print("╚══════════════════════════════════════╝")
+
+                                            total_money_spent = found_account.total_withdrawn + found_account.total_transferred + found_account.total_bills_paid + found_account.total_contributed_to_goals
+                                            print(f"{'Total Amount Of Money Spent':<30}: ${total_money_spent:,.2f}")
+                                            print("------------------")
+                                            
+                                            total_money_received = found_account.total_deposit + found_account.total_borrowed + found_account.total_received_transfers
+                                            print(f"{'Total Amount Of Money Received':<30}: ${total_money_received:,.2f}")
+                                            print("------------------")
+                                            
+                                            if found_account.monthly_budget == 0:
+                                                print("Currently Have No Monthly Budget")
+                                            else:                                         
+                                                remaining_monthly_budget = found_account.monthly_budget - found_account.money_spent_this_month
+                                                print(f"{'Remaining Monthly Budget':<30}: ${remaining_monthly_budget:,.2f}")
+
+
+                                            print("╔══════════════════════════════════════╗")
+                                            print("║            FINANCIAL HEALTH          ║")
+                                            print("╚══════════════════════════════════════╝")
+
+
+                                            print(f"Current Credit Score: {found_account.credit_score}")
+                                            print("------------------")
+                                            
+                                            print(f"Maximum Loan: ${found_account.get_max_loan():,.2f}")
+                                            print("------------------")
+                                            
+                                            account_status = found_account.account_locked
+                                            if found_account.account_locked is True:
+                                                account_status = found_account.account_locked
+                                                account_status = "Locked"
+
+                                            else:
+                                                account_status = "Unlocked"
+                                            
+                                            print(f"Account Status: {account_status}")
+                                            print("------------------")
+                                            
+                                            if found_account.monthly_budget == 0:
+                                                print("Budget Status: No Set")
+
+                                            else:
+                                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100                     
+                                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                                    print(f"Current Budget Status: EXCEEDED - ({budget_percentage_used}% Used)")
+                                                                                                                        
+                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                                    print(f"Current Budget Status: WARNING - Almost Exceeded ({budget_percentage_used}% Used)")
+                                                                                                                        
+                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                                    print(f"Current Budget Status: WARNING - ({budget_percentage_used}% Used)")
+                                            
+                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.30):
+                                                    print(f"Current Budget Status: Healthy - ({budget_percentage_used}% Used)")
+
+
+
+
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+                                            print("         BANK ANALYTICS DASHBOARD COMPLETE        ")
+                                            print("--------------------------------------------------")
+                                            print("--------------------------------------------------")
+
+
+                                        elif analytics_choice == "7":
+                                            print("Good Bye!")
+                                            break
+                                        else:
+                                            print("Invalid Choice pls retry!")
+                                            
+
+
+
+
+
+
+                                            
+
+
+
+
+
+
+
+
+
+
+                                            
+
+
+
+                                            
+                                                    
+
+
+
+                                            
+
+
+                                            
+
+                                           
+
+                                            
+
+
+
+                                            
+
+
+
+                                            
+
+
+
+
+                                        
+
+                                            
+
+
+
+
+
+                                            
+                                        
+
+                                            
+                                            
+
+
+
+
+
+
+                                            
+                                                    
+                                            
+
+
+
+
+
+
+                                                
+                                            
+
+                                            
+                                           
+
+                                        
+
+
+
+                                            
+
+
+
+
+
+
                                             
 
 
@@ -2698,7 +3270,7 @@ while True:
 
 
 
-    elif choice == "26":
+    elif choice == "27":
         if found_account.account_locked:
                 print("Account is locked!")
                 continue
@@ -2718,7 +3290,7 @@ while True:
 
 
 
-    elif choice == "27":
+    elif choice == "28":
         print("Have a good day. Bye!")
         break
 
