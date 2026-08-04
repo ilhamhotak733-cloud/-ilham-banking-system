@@ -42,6 +42,8 @@ class BankAccount:
         self.total_contributed_to_goals = 0
         self.total_received_transfers = 0
         self.total_transfer_received = 0
+        self.investment_balance = 0
+        self.total_invested = 0
 
 
 
@@ -388,9 +390,9 @@ def save_accounts():
         financial_goals = "|".join(financial_goals)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + str(acc.investment_balance) + "," + str(acc.total_invested) + "," + history 
         file.write(line + "\n")
-
+ 
     file.close()
 
 
@@ -488,7 +490,9 @@ def load_accounts():
         total_contributed_to_goals = int(data[24])
         total_received_transfers = int(data[25])
         total_transfer_received = int(data[26])
-        transaction_history = data[27].split("|")
+        investment_balance = float(data[27])
+        total_invested = int(data[28])
+        transaction_history = data[29].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -514,6 +518,8 @@ def load_accounts():
         account.total_contributed_to_goals = total_contributed_to_goals
         account.total_received_transfers = total_received_transfers
         account.total_transfer_received = total_transfer_received
+        account.investment_balance = investment_balance
+        account.total_invested = total_invested
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -566,8 +572,9 @@ while True:
     print(f"24. Show Notifications ({unread_count})")
     print("25. Finanical Goals")
     print("26. Spending Analytics")
-    print("27. Show All Accounts")
-    print("28. Exit")
+    print("27. Investment")
+    print("28. Show All Accounts")
+    print("29. Exit")
 
 
     choice = input("Choose an option: ")
@@ -2093,7 +2100,7 @@ while True:
                         print("3. Pay Internet Bill")
                         print("4. Pay Phone Bill")
                         print("5. Pay Gas Bill")
-                        print("6. Back")
+                        print("6. Exit")
 
 
                         bill_choice = input("Pls enter the Bill You would like to Pay: ")
@@ -2463,7 +2470,7 @@ while True:
                                 print("4. Edit A Goal")
                                 print("5. Delete A Goal")
                                 print("6. Clear All Goals")
-                                print("7. Back")
+                                print("7. Exit")
 
 
                                 goal_choice = input("Pls Choose an option: ")
@@ -2808,7 +2815,7 @@ while True:
                                         print("4. Spending Summary")
                                         print("5. Financial Health")
                                         print("6. Analytics Dashboard")
-                                        print("7. Back")
+                                        print("7. Exit")
 
                                         analytics_choice = input("Pls Choose a Option: ")
 
@@ -2824,7 +2831,7 @@ while True:
                                             print("-------------")
                                             print(f"{'Total Amount Withdrawn':<30}: ${found_account.total_withdrawn:,.2f}")
                                             print("-------------")
-                                            print(f"{'Total External Transfers Sent':<30}: ${found_account.total_transferred:,.2f}")
+                                            print(f"{'Total External Transfers Sents':<30}: ${found_account.total_transferred:,.2f}")
                                             print("-------------")
                                             print(f"{'Total Transfers Received':<30}: ${found_account.total_received_transfers:,.2f}")
                                             print("-------------")
@@ -3165,14 +3172,6 @@ while True:
                                             break
                                         else:
                                             print("Invalid Choice pls retry!")
-                                            
-
-
-
-
-
-
-                                            
 
 
 
@@ -3182,87 +3181,212 @@ while True:
 
 
 
+    elif choice == "27":
+        if found_account is None:
+            print("Pls Login First!")
+            continue
 
-                                            
-
-
-
-                                            
-                                                    
-
-
-
-                                            
+        if found_account.account_locked:
+            print("Account Is Locked!")
+            continue
 
 
-                                            
+        while True:
+                                
+                                
+                                
+                                                print("\n1. Invest Money")
+                                                print("2. View Investment")
+                                                print("3. Apply Growth")
+                                                print("4. Apply Loss")
+                                                print("5. Withdraw Investment")
+                                                print("6. Exit")
 
-                                           
+                                                investment_choice = input("Pls Choose A Choice: ")
 
-                                            
+                                                if investment_choice == "1":
+                                                    invest_amount = int(input("Pls Enter The Amount You Would Like To Invest: "))
 
-
-
-                                            
-
-
-
-                                            
-
-
-
-
-                                        
-
-                                            
-
+                                                    if invest_amount <= 0:
+                                                        print("Investment amount must be greater than zero!")
+                                                        continue
 
 
-
-
-                                            
-                                        
-
-                                            
-                                            
-
-
-
-
-
-
-                                            
-                                                    
-                                            
-
-
-
-
-
+                                                    if invest_amount > found_account.saving_balance:
+                                                        print("Insufficient savings balance!")
+                                                        continue
 
                                                 
-                                            
+
+                                                    found_account.saving_balance -= invest_amount
+                                                    found_account.investment_balance += invest_amount
+                                                    found_account.total_invested += invest_amount
+                                                    found_account.transaction_history.append("Invested: " + str(invest_amount))
+                                                    date_today_time = datetime.date.today()
+                                                    current_date_time = datetime.datetime.now()
+                                                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                    found_account.noifications.append({
+                                                        "message": "Invested Money Successfully!",
+                                                        "status": "unread",
+                                                        "date": date_today_time,
+                                                        "time": current_today_time
+                                                    })
+                                                    save_accounts()
+                                                    print("Money Invested Successfully!")
+
+
+                                                elif investment_choice == "2":
+                                                    print("╔══════════════════════════════════════╗")
+                                                    print("║               INVESTMENT             ║")
+                                                    print("╚══════════════════════════════════════╝")
+
+                                                    print(f"{'Current Investment Balance':<30}: ${found_account.investment_balance:,.2f}")
+                                                    print("------------------")
+                                                    print(f"{'Total Amount Invested':<30}: ${found_account.total_invested:,.2f}")
+
+
+
+                                                elif investment_choice == "3":
+                                                    print("╔══════════════════════════════════════╗")
+                                                    print("║               APPLY GROWTH           ║")
+                                                    print("╚══════════════════════════════════════╝")
+
+                                                    apply_growth_percentage = int(input("Pls Enter investment growth percentage: "))
+
+                                                    if apply_growth_percentage <= 0:
+                                                        print("Investment growth percentage must be greater than zero!")
+                                                        continue
+
+                                                    growth_profit = found_account.investment_balance * (apply_growth_percentage/100)
+
+                                                    found_account.investment_balance += growth_profit
+
+                                                    found_account.transaction_history.append("Investment Growth Added: " + str(growth_profit))
+                                                    date_today_time = datetime.date.today()
+                                                    current_date_time = datetime.datetime.now()
+                                                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                    found_account.noifications.append({
+                                                        "message": "Applied growth to investment Balance Successfully!",
+                                                        "status": "unread",
+                                                        "date": date_today_time,
+                                                        "time": current_today_time
+                                                    })
+                                                    save_accounts()
+
+                                                    print("Applied growth to investment Successfully!")
+
+                                                    print(f"{'New Investment Balance':<30}:   ${found_account.investment_balance:,.2f}")
+
+
+                                                elif investment_choice == "4":
+                                                    print("╔══════════════════════════════════════╗")
+                                                    print("║               APPLY LOSS             ║")
+                                                    print("╚══════════════════════════════════════╝")
+
+                                                    apply_loss_percentage = int(input("Pls Enter investment loss percentage: "))
+
+                                                    if apply_loss_percentage <= 0:
+                                                        print("Investment loss percentage must be greater than zero!")
+                                                        continue
+
+                                                    loss_profit = found_account.investment_balance * (apply_loss_percentage/100)
+
+
+                                                    found_account.investment_balance -= loss_profit
+
+                                                    if found_account.investment_balance < 0:
+                                                        found_account.investment_balance = 0
+
+                                                    found_account.transaction_history.append("Investment Loss Applied: " + str(loss_profit))
+                                                    date_today_time = datetime.date.today()
+                                                    current_date_time = datetime.datetime.now()
+                                                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                    found_account.noifications.append({
+                                                        "message": "Investment loss applied successfully!",
+                                                        "status": "unread",
+                                                        "date": date_today_time,
+                                                        "time": current_today_time
+                                                    })
+                                                    save_accounts()
+
+                                                    print("Investment loss applied successfully!")
+
+                                                    print(f"{'New Investment Balance':<30}: ${found_account.investment_balance:,.2f}")
+
+
+                                                elif investment_choice == "5":
+                                                    print("╔══════════════════════════════════════╗")
+                                                    print("║           WITHDRAW INVESTMENT        ║")
+                                                    print("╚══════════════════════════════════════╝")
+
+                                                    withdraw_investment = int(input("Please enter the amount you would like to withdraw:" ))
+
+                                                    if withdraw_investment <= 0:
+                                                        print("Withdrawal amount from investment must be greater than zero!")
+                                                        continue
+
+                                                    if withdraw_investment > found_account.investment_balance:
+                                                        print("Insufficient investment balance!")
+                                                        continue
+
+                                                    found_account.investment_balance -= withdraw_investment
+                                                    found_account.saving_balance += withdraw_investment
+
+                                                    found_account.transaction_history.append("Investment Withdrawal: " + str(withdraw_investment))
+                                                    date_today_time = datetime.date.today()
+                                                    current_date_time = datetime.datetime.now()
+                                                    current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                    found_account.noifications.append({
+                                                        "message": "Investment withdrawal completed successfully!",
+                                                        "status": "unread",
+                                                        "date": date_today_time,
+                                                        "time": current_today_time
+                                                    })
+                                                    save_accounts()
+
+                                                    print("Investment withdrawal completed successfully!")
+
+                                                    print(f"{'New Investment Balance':<30}: ${found_account.investment_balance:,.2f}")
+                                                    print("------------------")
+                                                    print(f"{'New Savings Balance':<30}: ${found_account.saving_balance:,.2f}")
+
+
+                                                elif investment_choice == "6":
+                                                    print("Good Bye!")
+                                                    break
+                                                else:
+                                                    print("Invalid Choice Pls retry!")
+
+
+
+
+
+
+
+
+                                                    
+
+                                                    
+                                                    
+
+
+
+
+
+
+    
 
                                             
-                                           
-
                                         
 
 
 
-                                            
+                                                                                                                       
+            
 
 
 
 
-
-
-                                            
-
-
-
-
-                                        
 
                                 
 
@@ -3270,7 +3394,7 @@ while True:
 
 
 
-    elif choice == "27":
+    elif choice == "28":
         if found_account.account_locked:
                 print("Account is locked!")
                 continue
@@ -3290,7 +3414,7 @@ while True:
 
 
 
-    elif choice == "28":
+    elif choice == "29":
         print("Have a good day. Bye!")
         break
 
