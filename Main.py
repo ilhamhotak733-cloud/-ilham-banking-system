@@ -44,7 +44,10 @@ class BankAccount:
         self.total_transfer_received = 0
         self.investment_balance = 0
         self.total_invested = 0
-
+        self.credit_card_balance = 0
+        self.credit_limit =  self.get_max_credit_limit()
+        self.available_credit = self.credit_limit
+        
 
 
         
@@ -325,6 +328,29 @@ class BankAccount:
             return False
         self.balance -= amount
         return True
+
+
+    def get_max_credit_limit(self):
+        if self.credit_score >= 750 and self.credit_score <= 850:
+            self.credit_limit = 5000
+
+        elif self.credit_score >= 650 and self.credit_score <= 749:
+            self.credit_limit = 2000
+
+        elif self.credit_score >= 500 and self.credit_score <= 649:
+            self.credit_limit = 1000
+
+        elif self.credit_score >= 300 and self.credit_score <= 499:
+             self.credit_limit = 100
+
+        return self.credit_limit
+
+        
+            
+
+        
+        
+         
             
         
 
@@ -390,7 +416,7 @@ def save_accounts():
         financial_goals = "|".join(financial_goals)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + str(acc.investment_balance) + "," + str(acc.total_invested) + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + str(acc.investment_balance) + "," + str(acc.total_invested) + "," + str(acc.credit_limit) + "," + str(acc.available_credit) + "," + str(acc.credit_card_balance) + "," + history 
         file.write(line + "\n")
  
     file.close()
@@ -492,7 +518,10 @@ def load_accounts():
         total_transfer_received = int(data[26])
         investment_balance = float(data[27])
         total_invested = int(data[28])
-        transaction_history = data[29].split("|")
+        credit_limit = int(data[29])
+        available_credit = int(data[30])
+        credit_card_balance = int(data[31])
+        transaction_history = data[32].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -520,6 +549,9 @@ def load_accounts():
         account.total_transfer_received = total_transfer_received
         account.investment_balance = investment_balance
         account.total_invested = total_invested
+        account.credit_limit = credit_limit
+        account.available_credit = available_credit
+        account.credit_card_balance = credit_card_balance
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -573,8 +605,9 @@ while True:
     print("25. Finanical Goals")
     print("26. Spending Analytics")
     print("27. Investment")
-    print("28. Show All Accounts")
-    print("29. Exit")
+    print("28. Credit Card")
+    print("29. Show All Accounts")
+    print("30. Exit")
 
 
     choice = input("Choose an option: ")
@@ -2399,8 +2432,9 @@ while True:
             status = noification.get("status")
             date = str(noification.get("date"))
             time = noification.get("time")
-            print(count, f"{message} ({status})")
+            print(f"{count}: {message} ({status})")
             print(f"{date} {time}")
+            print("--------------------")
             count = 1 + count
         save_accounts()
 
@@ -3354,6 +3388,7 @@ while True:
                                                 elif investment_choice == "6":
                                                     print("Good Bye!")
                                                     break
+
                                                 else:
                                                     print("Invalid Choice Pls retry!")
 
@@ -3364,20 +3399,178 @@ while True:
 
 
 
-                                                    
-
-                                                    
-                                                    
 
 
+    elif choice == "28":
+        if found_account is None:
+            print("Please Login In First!")
+            continue
 
+        if found_account.account_locked:
+            print("Account is locked!")
+            continue
 
-
-
-    
-
-                                            
+        while True:
                                         
+                                        
+                                        
+                                                        print("\n1. Make Purchase")
+                                                        print("2. View Credit Card")
+                                                        print("3. Pay Credit Card")
+                                                        print("4. Exit")
+
+
+                                                        credit_choice = input("Pls choose a choice: ")
+
+
+                                                        if credit_choice == "1":
+                                                            print("╔══════════════════════════════════════╗")
+                                                            print("║             MAKE A PURCHASE          ║")
+                                                            print("╚══════════════════════════════════════╝")
+
+                                                            make_purchase = int(input("Pleae enter the purchase amount: "))
+
+                                                            if make_purchase <= 0:
+                                                                print("Purchase amount must be greater than zero!")
+                                                                continue
+
+                                                            if make_purchase > found_account.available_credit:
+                                                                print("Insufficient available credit!")
+                                                                continue
+
+                                                            found_account.credit_card_balance += make_purchase
+                                                            found_account.available_credit -= make_purchase
+                                                            if found_account.available_credit == 0:
+                                                                found_account.credit_score -= 3
+                                                                date_today_time = datetime.date.today()
+                                                                current_date_time = datetime.datetime.now()
+                                                                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                                found_account.noifications.append({
+                                                                "message": "Credit score decreased by 3 points because your credit card reached its credit limit!",
+                                                                    "status": "unread",
+                                                                    "date": date_today_time,
+                                                                    "time": current_today_time
+                                                                })
+
+                                                            found_account.money_spent_this_month += make_purchase
+
+                                                            if found_account.monthly_budget > 0:
+                                                                budget_percentage_used = (found_account.money_spent_this_month/found_account.monthly_budget) * 100
+                                                                                        
+                                                                if found_account.money_spent_this_month > found_account.monthly_budget:
+                                                                    print("MAX BUDGET EXCEEDED!")
+                                                                                        
+                                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.95):
+                                                                    print("WARNING ALMOST EXCEEDED!")
+                                                                    print("you have USED", str(int(budget_percentage_used)) + "% of your BUDGET")
+                                                                                        
+                                                                    month_remaining_budget = found_account.monthly_budget - found_account.money_spent_this_month 
+                                                                    print("Your REMAINING Budget is: ", month_remaining_budget)
+                                                                                        
+                                                                elif found_account.money_spent_this_month >= (found_account.monthly_budget * 0.80):
+                                                                    print("WARNING!!")
+                                                                    print("You have used 80% of your monthly budget")
+
+                                                            found_account.transaction_history.append("Purchased Amount:" + str(make_purchase))
+
+                                                            date_today_time = datetime.date.today()
+                                                            current_date_time = datetime.datetime.now()
+                                                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                            found_account.noifications.append({
+                                                                "message": "Made A Purchase using credit card Successfully!",
+                                                                "status": "unread",
+                                                                "date": date_today_time,
+                                                                "time": current_today_time
+                                                            })
+                                                            save_accounts()
+                                                            print("Made a purchase using credit card successfully!")
+
+
+                                                        elif credit_choice == "2":
+                                                            print("╔══════════════════════════════════════╗")
+                                                            print("║            VIEW CREDIT CARD          ║")
+                                                            print("╚══════════════════════════════════════╝")
+
+                                                            print(f"{'Credit Limit':<30}: ${found_account.credit_limit:,.2f}")
+                                                            print("------------------")
+                                                            print(f"{'Available Credit':<30}: ${found_account.available_credit:,.2f}")
+                                                            print("------------------")
+                                                            print(f"{'Current Card Balance':<30}: ${found_account.credit_card_balance:,.2f}")
+
+
+                                                        elif credit_choice == "3":
+                                                            print("╔══════════════════════════════════════╗")
+                                                            print("║            PAY CREDIT CARD           ║")
+                                                            print("╚══════════════════════════════════════╝")
+
+                                                            pay_credit_card = int(input("Please enter the amount you would like to pay: "))
+
+                                                            if pay_credit_card <= 0:
+                                                                print("Pay amount must be greater than zero!")
+                                                                continue
+
+                                                            if pay_credit_card > found_account.balance:
+                                                                print("Insufficient checking balance!")
+                                                                continue
+
+                                                            if pay_credit_card > found_account.credit_card_balance:
+                                                                print("Cannot pay more than what you owe!")
+                                                                continue
+
+                                                            found_account.balance -= pay_credit_card
+                                                            found_account.credit_card_balance -= pay_credit_card
+                                                            found_account.available_credit += pay_credit_card
+                                                            if found_account.credit_card_balance == 0:    
+                                                                found_account.credit_score += 3
+                                                                date_today_time = datetime.date.today()
+                                                                current_date_time = datetime.datetime.now()
+                                                                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                                found_account.noifications.append({
+                                                                    "message": "Credit score increased by 3 points for paying off your credit card balance!",
+                                                                    "status": "unread",
+                                                                    "date": date_today_time,
+                                                                    "time": current_today_time
+                                                                })
+
+                                                            found_account.transaction_history.append("Paid credit card:" + str(pay_credit_card))
+                                                            date_today_time = datetime.date.today()
+                                                            current_date_time = datetime.datetime.now()
+                                                            current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                                                            found_account.noifications.append({
+                                                                "message": "Credit card payment completed successfully!",
+                                                                "status": "unread",
+                                                                "date": date_today_time,
+                                                                "time": current_today_time
+                                                            })
+                                                            save_accounts()
+                                                            print("Paid credit card Successfully!")
+
+                                                            print(f"{'New checking balance':<30}: ${found_account.balance:,.2f}")
+                                                            print("------------------")
+                                                            print(f"{'New credit card balance':<30}: ${found_account.credit_card_balance:,.2f}")
+                                                            print("------------------")
+                                                            print(f"{'New available credit':<30}: ${found_account.available_credit:,.2f}")
+
+
+
+                                                        elif credit_choice == "4":
+                                                            print("Have a Good day!")
+                                                            break
+                                                        else:
+                                                            print("Invaild Choice please retry")
+                                                            
+
+
+
+
+
+                                                             
+                                                             
+                                                             
+
+
+                                                            
+
 
 
 
@@ -3388,13 +3581,11 @@ while True:
 
 
 
-                                
+                            
 
 
 
-
-
-    elif choice == "28":
+    elif choice == "29":
         if found_account.account_locked:
                 print("Account is locked!")
                 continue
@@ -3414,10 +3605,9 @@ while True:
 
 
 
-    elif choice == "29":
+    elif choice == "30":
         print("Have a good day. Bye!")
         break
-
 
     else:
         print("Invalid option. Please try again.")
