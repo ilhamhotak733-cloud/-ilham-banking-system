@@ -47,6 +47,13 @@ class BankAccount:
         self.credit_card_balance = 0
         self.credit_limit =  self.get_max_credit_limit()
         self.available_credit = self.credit_limit
+        self.due_credit_month = 0
+        self.due_credit_day = 0
+        self.due_credit_year = 0
+        self.statement_credit_month = 0
+        self.statement_credit_day = 0
+        self.statement_credit_year = 0
+        self.generate_credit_card_dates()
         
 
 
@@ -345,6 +352,96 @@ class BankAccount:
 
         return self.credit_limit
 
+
+
+
+    def check_credit_card_due_date(self):
+        today = datetime.date.today()
+        due_date = datetime.date(
+            self.due_credit_year,
+            self.due_credit_month,
+            self.due_credit_day
+        )
+        days_until_due = (due_date - today).days
+        reminder_exists = False
+        for noification in self.noifications:
+            if noification["message"].startswith("Credit card payment is due in") or noification["message"].startswith("Credit card payment is due Today!"):
+                reminder_exists = True
+
+
+        if reminder_exists == False:
+            if days_until_due == 0:
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                self.noifications.append({
+                    "message": "Credit card payment is due Today!",
+                    "status": "unread",
+                    "date": date_today_time,
+                    "time": current_today_time
+                })
+
+
+            elif 0 < days_until_due <= 7:
+                date_today_time = datetime.date.today()
+                current_date_time = datetime.datetime.now()
+                current_today_time = current_date_time.strftime("%I:%M:%S %p")
+                self.noifications.append({
+                    "message": f"Credit card payment is due in {days_until_due} days!",
+                    "status": "unread",
+                    "date": date_today_time,
+                    "time": current_today_time
+                })
+       
+
+
+
+
+
+
+    def generate_credit_card_dates(self):
+        today = datetime.date.today()
+
+        self.statement_credit_year = today.year
+        self.statement_credit_month = today.month
+        self.statement_credit_day = today.day
+
+        statement_date = datetime.date(
+            self.statement_credit_year,
+            self.statement_credit_month,
+            self.statement_credit_day
+        )
+
+        due_date = statement_date + datetime.timedelta(days=21)
+
+        self.due_credit_year = due_date.year
+        self.due_credit_month = due_date.month
+        self.due_credit_day = due_date.day
+
+        
+
+        
+
+
+
+        
+                
+
+       
+
+
+       
+            
+            
+                 
+                 
+            
+             
+             
+             
+
+         
+
         
             
 
@@ -416,7 +513,7 @@ def save_accounts():
         financial_goals = "|".join(financial_goals)
         history = "|".join(acc.transaction_history)
         
-        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + str(acc.investment_balance) + "," + str(acc.total_invested) + "," + str(acc.credit_limit) + "," + str(acc.available_credit) + "," + str(acc.credit_card_balance) + "," + history 
+        line = acc.name + "," + str(acc.age) + "," + acc.get_pin() + "," + str(acc.balance) + "," + str(acc.debt) + "," + str(acc.failed_login_attempts) + "," + str(acc.account_locked) + "," + str(acc.credit_score) + "," + str(acc.saving_balance) + "," + str(acc.card_number) + "," + str(acc.cvv) + "," + str(acc.expiration_month) + "," + str(acc.expiration_year) + "," + str(acc.monthly_budget) + "," + str(acc.money_spent_this_month) + "," + noifications + "," + financial_goals + "," + str(acc.total_deposit) + "," + str(acc.total_withdrawn) + "," + str(acc.total_transferred) + "," + str(acc.total_bills_paid) + "," + str(acc.total_saved) + "," + str(acc.total_borrowed) + "," + str(acc.total_repaid) + "," + str(acc.total_contributed_to_goals) + "," + str(acc.total_received_transfers) + "," + str(acc.total_transfer_received) + "," + str(acc.investment_balance) + "," + str(acc.total_invested) + "," + str(acc.credit_limit) + "," + str(acc.available_credit) + "," + str(acc.credit_card_balance) + "," + str(acc.due_credit_month) + "," + str(acc.due_credit_day) + "," + str(acc.due_credit_year) + "," + str(acc.statement_credit_month) + "," + str(acc.statement_credit_day) + "," + str(acc.statement_credit_year) + "," + history
         file.write(line + "\n")
  
     file.close()
@@ -521,7 +618,13 @@ def load_accounts():
         credit_limit = int(data[29])
         available_credit = int(data[30])
         credit_card_balance = int(data[31])
-        transaction_history = data[32].split("|")
+        due_credit_month = int(data[32])
+        due_credit_day = int(data[33])
+        due_credit_year = int(data[34])
+        statement_credit_month = int(data[35])
+        statement_credit_day = int(data[36])
+        statement_credit_year = int(data[37])
+        transaction_history = data[38].split("|")
 
         account = BankAccount(name, age, pin, balance)
         account.debt = debt
@@ -552,6 +655,12 @@ def load_accounts():
         account.credit_limit = credit_limit
         account.available_credit = available_credit
         account.credit_card_balance = credit_card_balance
+        account.due_credit_month = due_credit_month
+        account.due_credit_day = due_credit_day
+        account.due_credit_year = due_credit_year
+        account.statement_credit_month = statement_credit_month
+        account.statement_credit_day = statement_credit_day
+        account.statement_credit_year = statement_credit_year
         account.transaction_history = transaction_history
 
         accounts.append(account)
@@ -676,7 +785,9 @@ while True:
                     found_account = acc
                     found_account.failed_login_attempts = 0
                     print("Log in successful")
+                    found_account.check_credit_card_due_date()
                     break
+                    
                 
 
                 else:
@@ -3496,6 +3607,10 @@ while True:
                                                             print(f"{'Available Credit':<30}: ${found_account.available_credit:,.2f}")
                                                             print("------------------")
                                                             print(f"{'Current Card Balance':<30}: ${found_account.credit_card_balance:,.2f}")
+                                                            print("------------------")
+                                                            print(f"{'Credit Card Statement Date':<30}: {found_account.statement_credit_month}/{found_account.statement_credit_day}/{found_account.statement_credit_year}")
+                                                            print("------------------")
+                                                            print(f"{'Credit Card Due Date':<30}: {found_account.due_credit_month}/{found_account.due_credit_day}/{found_account.due_credit_year}")
 
 
                                                         elif credit_choice == "3":
@@ -3558,6 +3673,7 @@ while True:
                                                             break
                                                         else:
                                                             print("Invaild Choice please retry")
+
                                                              
                                                              
                                                         
