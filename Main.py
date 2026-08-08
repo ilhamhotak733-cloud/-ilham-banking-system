@@ -330,11 +330,18 @@ class BankAccount:
 
 
 
+
+
+
+
     def remove_balance(self, amount):
         if amount > self.balance:
             return False
         self.balance -= amount
         return True
+
+
+
 
 
     def get_max_credit_limit(self):
@@ -351,6 +358,10 @@ class BankAccount:
              self.credit_limit = 100
 
         return self.credit_limit
+
+
+
+
 
 
 
@@ -399,6 +410,8 @@ class BankAccount:
 
 
 
+
+
     def generate_credit_card_dates(self):
         today = datetime.date.today()
 
@@ -425,42 +438,6 @@ class BankAccount:
 
 
         
-                
-
-       
-
-
-       
-            
-            
-                 
-                 
-            
-             
-             
-             
-
-         
-
-        
-            
-
-        
-        
-         
-            
-        
-
-        
-
-
-
-
-
-
-
-
-
 
 
 
